@@ -6,7 +6,9 @@ var parseFunctions =
 'VariableDeclaration':parseVD, 
 'IfStatement':parseIf, 
 'BlockStatement':parseBS,
-'BinaryExpression':parseBE};
+'BinaryExpression':parseBE,
+'AssignmentExpression':parseAS,
+'ForStatement':parseFor};
 
 var hash = {};
 
@@ -16,14 +18,20 @@ var IF_CONS = "IF_C";
 var IF_ALT = "IF_A";
 var IF_TEST = "IF_T";
 
+var FOR_INIT = "FOR_INIT";
+var FOR_UPDATE = "FOR_UPDATE";
+var FOR_TEST = "FOR_TEST";
+var FOR_BODY = "FOR_BODY";
+
 var END_NODE = {type:"End"};
 
 
 var DEPTH = 2;
 
-var ret = parseFile('var answer = 42; var a = 30; var b = 20; var c = 1; ');
-//var ret = parseFile("if (a=='5') { var a = 10; } else var b = 3;");
-console.log(JSON.stringify(ret, null, 2));
+// var ret = parseFile('var answer = 42; var a = 30; var b = 20; var c = 1; ');
+//var ret = parseFile("if (a=='5') { var a = 10; } else b = 3;");
+var ret = parseFile("for (var i = 0; i < 5; i++) { var a = 4; if (a == '5') { b = 5; } }");
+console.log(JSON.stringify(ret));
 
 function traverse(path)
 {
@@ -56,14 +64,27 @@ function parseEnd(end, path)
 {
 }
 
-function parseVD(vd, path)
+function parseVD(vd, path) //VariableDeclaration
 {
 	//store declarations information
 }
 
-function parseBE(node, path)
+function parseBE(node, path) //BinaryExpression
 {
 	//store operator, lhs and rhs information
+}
+
+function parseAS(node, path) //AssignmentExpression
+{
+	//store lhs, rhs
+}
+
+function realNode(node)
+{
+	if (node.type == "ExpressionStatement")
+		return node.expression;
+
+	return node;
 }
 
 function parseIf(node, path)
@@ -86,6 +107,14 @@ function parseBlock(node, path)
 	parseNode(END_NODE, path);
 }
 
+function parseFor(node, path)
+{
+	parseNode(node.init, path.concat([node.type, FOR_INIT]));
+	parseNode(node.test, path.concat([node.type, FOR_TEST]));
+	parseNode(node.update, path.concat([node.type, FOR_UPDATE]));
+	parseNode(node.body, path.concat([node.type, FOR_BODY]));
+}
+
 function parseBS(node, path)
 {
 	parseBlock(node, path);
@@ -98,6 +127,7 @@ function parseProgram(program)
 
 function parseNode(node, path)
 {
+	node = realNode(node);
 	if (path)
 		addCount(node, path);
 	console.log("parsing ", node.type, " path=",path);
@@ -107,8 +137,9 @@ function parseNode(node, path)
 	}
 }
 
-function parseFile(text)
+function parseFile(text, d)
 {
+	DEPTH = d || 2;
 	var syntax = esprima.parse(text);
 	parseNode(syntax);
 	return hash;
