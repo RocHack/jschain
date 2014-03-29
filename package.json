@@ -1,0 +1,23 @@
+{
+  "name": "jschain",
+  "version": "0.0.0",
+  "description": "jschain =======",
+  "main": "index.js",
+  "dependencies": {
+    "esprima": "~1.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dingbat/jschain.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dingbat/jschain/issues"
+  },
+  "homepage": "https://github.com/dingbat/jschain"
+}
