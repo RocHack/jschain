@@ -22,9 +22,8 @@ var END_NODE = {type:"End"};
 var DEPTH = 2;
 
 //parseFile('var answer = 42; var a = 30; var b = 20; var c = 1;');
-parseFile("if (a=='5') { var a = 10; } else var b = 3;");
-
-console.log(JSON.stringify(hash, null, 2));
+//var ret = parseFile("if (a=='5') { var a = 10; } else var b = 3;");
+//console.log(JSON.stringify(ret));
 
 function traverse(path)
 {
@@ -55,10 +54,12 @@ function parseEnd(end, path)
 
 function parseVD(vd, path)
 {
+	//store declarations information
 }
 
 function parseBE(node, path)
 {
+	//store operator, lhs and rhs information
 }
 
 function parseIf(node, path)
@@ -115,8 +116,17 @@ function parseNode(node, path)
 	}
 }
 
-function parseFile(text)
+function parseFile(text)
 {
 	var syntax = esprima.parse(text);
 	parseNode(syntax);
+	return hash;
 }
+
+function reset()
+{
+	hash = {};
+}
+
+module.exports.parseFile = parseFile;
+module.exports.reset = reset;
