@@ -21,31 +21,35 @@ var END_NODE = {type:"End"};
 
 var DEPTH = 2;
 
-//parseFile('var answer = 42; var a = 30; var b = 20; var c = 1;');
+var ret = parseFile('var answer = 42; var a = 30; var b = 20; var c = 1; ');
 //var ret = parseFile("if (a=='5') { var a = 10; } else var b = 3;");
-//console.log(JSON.stringify(ret));
+console.log(JSON.stringify(ret, null, 2));
 
 function traverse(path)
 {
 	console.log("traversing ",path);
 	console.log("hash= ",hash);
 	var working = hash;
-	for (var d = DEPTH*2; d > 0; d--)
+
+	for (var d = Math.min(DEPTH*2, path.length); d > 0; d--)
 	{
 		var elem = path[path.length-d];
 		console.log("looking up ",elem, " in ",working);
 		working = working[elem] || (working[elem] = {});
 	}
+
+	//if the path wasn't long enough, have to append nulls to make it the required depth
+	var extras = DEPTH*2 - path.length;
+	for (; extras > 0; extras -= 2) //-=2 because we're subtracting from DEPTH*2, ie, 'program' & 'F'...
+		working = (working[null] = {});
+
 	return working;
 }
 
 function addCount(node, path)
 {
-	if (path && path.length >= DEPTH*2)
-	{
-		var probs = traverse(path);
-		probs[node.type] = (probs[node.type] || 0) + 1;
-	}
+	var probs = traverse(path);
+	probs[node.type] = (probs[node.type] || 0) + 1;
 }
 
 function parseEnd(end, path)
@@ -69,7 +73,7 @@ function parseIf(node, path)
 	parseNode(node.alternate || END_NODE, path.concat([node.type, IF_ALT]));
 }
 
-function parseBS(node, path)
+function parseBlock(node, path)
 {
 	path = path.concat([node.type, BODY]);
 	var statements = node.body;
@@ -82,33 +86,20 @@ function parseBS(node, path)
 	parseNode(END_NODE, path);
 }
 
+function parseBS(node, path)
+{
+	parseBlock(node, path);
+}
+
 function parseProgram(program)
 {
-	var statements = program.body;
-	hash[program.type] = hash[program.type] || {};
-	var null_prob = hash[program.type][null] || (hash[program.type][null] = {});
-
-	var path = [program.type, BODY];
-	for (var i = 0; i < statements.length; i++)
-	{
-		var statement = statements[i];
-
-		if (i == 0)
-		{
-			null_prob[statement.type] = (null_prob[statement.type] || 0) + 1;
-		}
-
-		parseNode(statement, path);
-
-		path = path.concat([statement.type, FOLLOW]);
-	}
-
-	parseNode(END_NODE, path);
+	parseBlock(program, []);
 }
 
 function parseNode(node, path)
 {
-	addCount(node, path);
+	if (path)
+		addCount(node, path);
 	console.log("parsing ", node.type, " path=",path);
 	if (parseFunctions[node.type])
 	{
