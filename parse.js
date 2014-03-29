@@ -8,7 +8,10 @@ var parseFunctions =
 'BlockStatement':parseBS,
 'BinaryExpression':parseBE,
 'AssignmentExpression':parseAS,
-'ForStatement':parseFor};
+'ForStatement':parseFor,
+'WhileStatement':parseWhile,
+'FunctionDeclaration':parseFunc,
+'FunctionExpression':parseFunc};
 
 var hash = {};
 
@@ -23,6 +26,11 @@ var FOR_UPDATE = "FOR_UPDATE";
 var FOR_TEST = "FOR_TEST";
 var FOR_BODY = "FOR_BODY";
 
+var WHILE_TEST = "WHILE_TEST";
+var WHILE_BODY = "WHILE_BODY";
+
+var FUNC_BODY = "FUNC_BODY";
+
 var END_NODE = {type:"End"};
 
 
@@ -30,8 +38,12 @@ var DEPTH = 2;
 
 // var ret = parseFile('var answer = 42; var a = 30; var b = 20; var c = 1; ');
 //var ret = parseFile("if (a=='5') { var a = 10; } else b = 3;");
-var ret = parseFile("for (var i = 0; i < 5; i++) { var a = 4; if (a == '5') { b = 5; } }");
-console.log(JSON.stringify(ret));
+//var ret = parseFile("for (var i = 0; i < 5; i++) { var a = 4; if (a == '5') { b = 5; } }");
+//var ret = parseFile("while (i < 0) { var a = 4; if (a == '5') { b = 5; } }");
+var ret = parseFile("function foo () { var a = function () {}; if (a == '5') { b = 5; } }");
+
+console.log(JSON.stringify(ret, null, 2));
+// console.log(JSON.stringify(ret));
 
 function traverse(path)
 {
@@ -115,9 +127,21 @@ function parseFor(node, path)
 	parseNode(node.body, path.concat([node.type, FOR_BODY]));
 }
 
+function parseWhile(node, path)
+{
+	parseNode(node.test, path.concat([node.type, WHILE_TEST]));
+	parseNode(node.body, path.concat([node.type, WHILE_BODY]));
+}
+
 function parseBS(node, path)
 {
 	parseBlock(node, path);
+}
+
+function parseFunc(node, path)
+{
+	//params?
+	parseNode(node.body, path.concat([node.type, FUNC_BODY]));
 }
 
 function parseProgram(program)
