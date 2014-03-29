@@ -31,18 +31,20 @@ var WHILE_BODY = "WHILE_BODY";
 
 var FUNC_BODY = "FUNC_BODY";
 
-var END_NODE = {type:"End"};
+var END_NODE = {type:"_end"};
+
+var TOTAL = "_total";
 
 
-var DEPTH = 2;
+var DEPTH = 3;
 
-// var ret = parseFile('var answer = 42; var a = 30; var b = 20; var c = 1; ');
-//var ret = parseFile("if (a=='5') { var a = 10; } else b = 3;");
+// var ret = parseFile('var answer = 42; var a = 30; var b = 20; var c = 1; var d = 2;',3);
+// var ret = parseFile("if (a=='5') { var a = 10; } else b = 3;",3);
 //var ret = parseFile("for (var i = 0; i < 5; i++) { var a = 4; if (a == '5') { b = 5; } }");
 //var ret = parseFile("while (i < 0) { var a = 4; if (a == '5') { b = 5; } }");
-var ret = parseFile("function foo () { var a = function () {}; if (a == '5') { b = 5; } }");
+// var ret = parseFile("function foo () { var a = function () {}; if (a == '5') { b = 5; } }");
 
-console.log(JSON.stringify(ret, null, 2));
+// console.log(JSON.stringify(ret, null, 2));
 // console.log(JSON.stringify(ret));
 
 function traverse(path)
@@ -63,6 +65,8 @@ function traverse(path)
 	for (; extras > 0; extras -= 2) //-=2 because we're subtracting from DEPTH*2, ie, 'program' & 'F'...
 		working = (working[null] = {});
 
+	working[TOTAL] = working[TOTAL] || 0;
+
 	return working;
 }
 
@@ -70,6 +74,7 @@ function addCount(node, path)
 {
 	var probs = traverse(path);
 	probs[node.type] = (probs[node.type] || 0) + 1;
+	probs[TOTAL] += 1;
 }
 
 function parseEnd(end, path)
