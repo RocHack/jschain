@@ -16,8 +16,9 @@ fun! CompleteJS(findstart, base)
 
     " Gather the code to use as input
     " Use the code up to the current line
-    let corpus = join(getline(1, '.'), "\n")
-    let matches = split(system("node vim/complete.js", corpus), "\n")
+    let corpus = join(getline(1, '$'), "\n")
+    let matches = []
+    exec system("node vim/complete.js " . line('.'), corpus)
     return {'words': matches, 'refresh': 'always'}
   endif
 endfun

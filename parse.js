@@ -67,7 +67,13 @@ var TOTAL = "_total";
 var DEPTH, DEFAULT_DEPTH = 2;
 
 
+var goalLineNum;
+var currentLineNum;
+var pathAtLine = ['Program', BODY];
+
+/*
 var ret = parseFile('var answer = x.b(); var a = x.foo(); var b = 20; var c = 1; var d = 2;');
+
 var ret = parseFile("if (a=='5') { var a = 10; } else b = 3;");
 var ret = parseFile("for (var i = 0; i < 5; i++) { var a = x; if (a == '5') { b = 5; } }");
 var ret = parseFile("while (i > 0) { var a = 4; if (a > 5) { b = 5; } i--; }");
@@ -77,7 +83,7 @@ var ret = parseFile("var hi = {}; h = (a = 3); function foo () { if (a == '5') {
 // var json = JSON.stringify(ret, null, 2);
 // console.log(json);
 console.log(JSON.stringify(ret));
-
+*/
 
 function traverse(path)
 {
@@ -220,12 +226,25 @@ function parseProgram(program)
 
 function parseNode(node, path)
 {
-	if (path)
+	if (!node)
+		node = END_NODE;
+	if (path.length)
 		addCount(node, path);
 	// console.log("parsing ", node.type, " path=",path);
+	// look for the node right before the goal line
+	if (node.loc)
+	{
+		var startLineNum = node.loc.start.line;
+		if (startLineNum < goalLineNum && startLineNum > currentLineNum)
+		{
+			currentLineNum = startLineNum;
+			pathAtLine = path;
+			//console.log(startLineNum, node);
+		}
+	}
 	if (parseFunctions[node.type])
 	{
-		parseFunctions[node.type](node, path);
+		parseFunctions[node.type](node, path.slice(-DEPTH*2));
 	}
 }
 
@@ -235,14 +254,33 @@ function parseFile(text, d)
 
 	DEPTH = d || DEFAULT_DEPTH;
 	var syntax = esprima.parse(text, {tolerant: true});
-	parseNode(syntax);
+	parseNode(syntax, []);
+	return hash;
+}
+
+function parseSyntax(syntax, lineNum)
+{
+	reset();
+	goalLineNum = lineNum;
+
+	DEPTH = DEFAULT_DEPTH;
+	parseNode(syntax, []);
 	return hash;
 }
 
 function reset()
 {
 	hash = {};
+	pathAtLine = ['Program', BODY];
+	currentLineNum = 0;
+}
+
+function getPathForLine()
+{
+	return pathAtLine;
 }
 
 module.exports.parseFile = parseFile;
+module.exports.parseSyntax = parseSyntax;
 module.exports.reset = reset;
+module.exports.getPathForLine = getPathForLine;
