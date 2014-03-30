@@ -8,11 +8,13 @@ var parseFunctions =
 'IfStatement':parseIf, 
 'BlockStatement':parseBS,
 'BinaryExpression':parseBE,
+'LogicalExpression':parseLE,
 'AssignmentExpression':parseAE,
 'ForStatement':parseFor,
 'WhileStatement':parseWhile,
 'FunctionDeclaration':parseFunc,
 'FunctionExpression':parseFuncExp,
+'ArrayExpression':parseArrayExpression,
 'ExpressionStatement':parseES,
 'CallExpression':parseCall,
 'ReturnStatement':parseReturn,
@@ -133,6 +135,14 @@ function parseBE(node, path) //BinaryExpression
 	parseNode(node.operator, path.concat(node.type, BE_OP));
 }
 
+function parseLE(node, path) //LogicalExpression
+{
+	//store operator, lhs and rhs information
+	parseNode(node.left, path.concat(node.type, BE_LEFT));
+	parseNode(node.right, path.concat(node.type, BE_RIGHT));
+	parseNode(node.operator, path.concat(node.type, BE_OP));
+}
+
 function parseAE(node, path) //AssignmentExpression
 {
 	//store lhs, rhs
@@ -217,6 +227,19 @@ function parseFuncExp(node, path)
 {
 	//params?
 	parseNode(node.body, path.concat([node.type, FUNC_E_BODY]));
+}
+
+function parseArrayExpression(node, path)
+{
+	var expressions = node.elements || [];
+	path = path.concat([node.type, BODY]);
+	for (var i = 0; i < expressions.length; i++)
+	{
+		var expression = expressions[i];
+		parseNode(expression, path);
+		path = path.concat([expression.type, FOLLOW]);
+	}
+	parseNode(END_NODE, path);
 }
 
 function parseProgram(program)

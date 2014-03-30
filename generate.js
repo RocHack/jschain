@@ -54,6 +54,7 @@ var generateFunctions = {
 	'ForStatement': generateFor,
 	'WhileStatement': generateWhile,
 	'BinaryExpression': generateBE,
+	'LogicalExpression': generateLE,
 	'UpdateExpression': generateUE,
 	'IfStatement': generateIf,
 	'AssignmentExpression': generateAE,
@@ -64,6 +65,7 @@ var generateFunctions = {
 	'ObjectExpression':generateOE,
 	'ReturnStatement':generateReturn,
 	'MemberExpression':generateME,
+	'ArrayExpression':generateArrayExpression,
 	'_end': generateEnd
 };
 
@@ -239,6 +241,16 @@ function generateBE(model, path)
 	};
 }
 
+function generateLE(model, path)
+{
+	return {
+	    "type": "LogicalExpression",
+	    "operator": generateNode(model, path.concat(BE_OP)),
+	    "left": generateNode(model, path.concat(BE_LEFT)),
+	    "right": generateNode(model, path.concat(BE_RIGHT))
+	};
+}
+
 function generateUE(model, path)
 {
 	return {
@@ -328,6 +340,22 @@ function generateFor(model, path)
         test: generateNode(model, path.concat(FOR_TEST)),
         update: generateNode(model, path.concat(FOR_UPDATE)),
         body: generateNode(model, path.concat(FOR_BODY))
+    }
+}
+
+function generateArrayExpression(model, path)
+{
+	var sPath = path.concat(BODY);
+	var exprs = [];
+	var expr = generateNode(model, sPath);
+	while (expr && expr.type != END) {
+		exprs.push(expr);
+		sPath = sPath.concat(expr.type, FOLLOW);
+		expr = generateNode(model, sPath);
+	}
+	return {
+        type: "ArrayExpression",
+        elements: exprs
     }
 }
 
