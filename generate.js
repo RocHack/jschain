@@ -49,7 +49,7 @@ var generateFunctions = {
 	'FunctionDeclaration': generateFD,
 	'FunctionExpression': generateFE,
 	'VariableDeclaration': generateVDeclaration,
-	'EmptyExpression': generateEE,
+	'EmptyStatement': generateEmptyStatement,
 	'BlockStatement': generateBS,
 	'ForStatement': generateFor,
 	'WhileStatement': generateWhile,
@@ -116,9 +116,9 @@ function generateUnknown(type, path)
 	return {type: type, path: path};
 }
 
-function generateEE()
+function generateEmptyStatement()
 {
-	return {type: "EmptyExpression"};
+	return {type: "EmptyStatement"};
 }
 
 function generateWhile(model, path)
