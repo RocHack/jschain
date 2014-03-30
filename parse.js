@@ -14,6 +14,8 @@ var parseFunctions =
 'FunctionDeclaration':parseFunc,
 'FunctionExpression':parseFunc};
 
+var hash = {};
+
 var BODY = "B";
 var FOLLOW = "F";
 var IF_CONS = "IF_C";
@@ -47,7 +49,7 @@ var json = JSON.stringify(ret, null, 2);
 console.log(json);
 // console.log(JSON.stringify(ret));
 
-function traverse(hash, path)
+function traverse(path)
 {
 	console.log("traversing ",path);
 	console.log("hash= ",hash);
@@ -70,9 +72,9 @@ function traverse(hash, path)
 	return working;
 }
 
-function addCount(hash, node, path)
+function addCount(node, path)
 {
-	var probs = traverse(hash, path);
+	var probs = traverse(path);
 	probs[node.type] = (probs[node.type] || 0) + 1;
 	probs[TOTAL] += 1;
 }
@@ -104,65 +106,65 @@ function realNode(node)
 	return node;
 }
 
-function parseIf(hash, node, path)
+function parseIf(node, path)
 {
-	parseNode(hash, node.test, path.concat([node.type, IF_TEST]));
-	parseNode(hash, node.consequent, path.concat([node.type, IF_CONS]));
-	parseNode(hash, node.alternate || END_NODE, path.concat([node.type, IF_ALT]));
+	parseNode(node.test, path.concat([node.type, IF_TEST]));
+	parseNode(node.consequent, path.concat([node.type, IF_CONS]));
+	parseNode(node.alternate || END_NODE, path.concat([node.type, IF_ALT]));
 }
 
-function parseBlock(hash, node, path)
+function parseBlock(node, path)
 {
 	path = path.concat([node.type, BODY]);
 	var statements = node.body;
 	for (var i = 0; i < statements.length; i++)
 	{
 		var statement = statements[i];
-		parseNode(hash, statement, path);
+		parseNode(statement, path);
 		path = path.concat([statement.type, FOLLOW]);
 	}
-	parseNode(hash, END_NODE, path);
+	parseNode(END_NODE, path);
 }
 
-function parseFor(hash, node, path)
+function parseFor(node, path)
 {
-	parseNode(hash, node.init, path.concat([node.type, FOR_INIT]));
-	parseNode(hash, node.test, path.concat([node.type, FOR_TEST]));
-	parseNode(hash, node.update, path.concat([node.type, FOR_UPDATE]));
-	parseNode(hash, node.body, path.concat([node.type, FOR_BODY]));
+	parseNode(node.init, path.concat([node.type, FOR_INIT]));
+	parseNode(node.test, path.concat([node.type, FOR_TEST]));
+	parseNode(node.update, path.concat([node.type, FOR_UPDATE]));
+	parseNode(node.body, path.concat([node.type, FOR_BODY]));
 }
 
-function parseWhile(hash, node, path)
+function parseWhile(node, path)
 {
-	parseNode(hash, node.test, path.concat([node.type, WHILE_TEST]));
-	parseNode(hash, node.body, path.concat([node.type, WHILE_BODY]));
+	parseNode(node.test, path.concat([node.type, WHILE_TEST]));
+	parseNode(node.body, path.concat([node.type, WHILE_BODY]));
 }
 
-function parseBS(hash, node, path)
+function parseBS(node, path)
 {
-	parseBlock(hash, node, path);
+	parseBlock(node, path);
 }
 
-function parseFunc(hash, node, path)
+function parseFunc(node, path)
 {
 	//params?
-	parseNode(hash, node.body, path.concat([node.type, FUNC_BODY]));
+	parseNode(node.body, path.concat([node.type, FUNC_BODY]));
 }
 
-function parseProgram(hash, program)
+function parseProgram(program)
 {
-	parseBlock(hash, program, []);
+	parseBlock(program, []);
 }
 
-function parseNode(hash, node, path)
+function parseNode(node, path)
 {
 	node = realNode(node);
 	if (path)
-		addCount(hash, node, path);
+		addCount(node, path);
 	console.log("parsing ", node.type, " path=",path);
 	if (parseFunctions[node.type])
 	{
-		parseFunctions[node.type](hash, node, path);
+		parseFunctions[node.type](node, path);
 	}
 }
 
@@ -170,9 +172,14 @@ function parseFile(text, d)
 {
 	DEPTH = d || DEFAULT_DEPTH;
 	var syntax = esprima.parse(text);
-	var hash = {};
-	parseNode(hash, syntax);
+	parseNode(syntax);
 	return hash;
 }
 
+function reset()
+{
+	hash = {};
+}
+
 module.exports.parseFile = parseFile;
+module.exports.reset = reset;
