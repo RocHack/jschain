@@ -15,10 +15,16 @@ var WHILE_TEST = "WHILE_TEST";
 var WHILE_BODY = "WHILE_BODY";
 
 var FUNC_BODY = "FUNC_BODY";
+var FUNC_E_BODY = "FUNC_E_BODY";
 
 var EXPR = "EXPR";
+
 var AE_LEFT = "AE_LEFT";
 var AE_RIGHT = "AE_RIGHT";
+var BE_LEFT = "BE_LEFT";
+var BE_RIGHT = "BE_RIGHT";
+
+var VD_INIT = "VD_INIT";
 
 var END = "_end";
 
@@ -28,6 +34,7 @@ var DEPTH = 2;
 var generateFunctions = {
 	'Program': generateProgram,
 	'FunctionDeclaration': generateFD,
+	'FunctionExpression': generateFE,
 	'VariableDeclaration': generateVDeclaration,
 	'EmptyExpression': generateEE,
 	'BlockStatement': generateBS,
@@ -180,15 +187,8 @@ function generateBE(model, path)
 	return {
 	    "type": "BinaryExpression",
 	    "operator": "<",
-	    "left": {
-	        "type": "Identifier",
-	        "name": "ID"
-	    },
-	    "right": {
-	        "type": "Literal",
-	        "value": 0,
-	        "raw": "0"
-	    }
+	    "left": generateNode(model, path.concat(BE_LEFT)),
+	    "right": generateNode(model, path.concat(BE_RIGHT))
 	};
 }
 
@@ -230,6 +230,20 @@ function generateFD(model, path)
 	};
 }
 
+function generateFE(model, path)
+{
+	return {
+        "type": "FunctionExpression",
+        "id": null,
+        "params": [],
+        "defaults": [],
+        "body": generateNode(model, path.concat(FUNC_E_BODY)),
+        "rest": null,
+        "generator": false,
+        "expression": false
+    }
+}
+
 function generateVDeclaration(model, path)
 {
 	var declarations = [];
@@ -250,11 +264,7 @@ function generateVDeclarator(model, path)
 			"type": "Identifier",
 			"name": "ID"
 		},
-		init: {
-			"type": "Literal",
-			"value": 0,
-			"raw": "0"
-		}
+		init: generateNode(model, path.concat(VD_INIT))
 	};
 }
 
@@ -330,7 +340,7 @@ var m = {
 // var m = {"Program":{"B":{"null":{"null":{"_total":6,"VariableDeclaration":2,"IfStatement":1,"ForStatement":1,"WhileStatement":1,"FunctionDeclaration":1}},"VariableDeclaration":{"F":{"null":{"_total":2,"VariableDeclaration":1,"FunctionDeclaration":1},"VariableDeclaration":{"F":{"_total":1,"VariableDeclaration":1}},"FunctionDeclaration":{"FUNC_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"FunctionDeclaration":1}}}},"IfStatement":{"IF_T":{"null":{"_total":1,"BinaryExpression":1}},"IF_C":{"null":{"_total":1,"BlockStatement":1},"BlockStatement":{"B":{"_total":1,"VariableDeclaration":1}}},"IF_A":{"null":{"_total":1,"ExpressionStatement":1},"ExpressionStatement":{"EXPR":{"_total":1,"AssignmentExpression":1}}},"F":{"null":{"_total":1,"_end":1}}},"ForStatement":{"FOR_INIT":{"null":{"_total":1,"VariableDeclaration":1}},"FOR_TEST":{"null":{"_total":1,"BinaryExpression":1}},"FOR_UPDATE":{"null":{"_total":1,"UpdateExpression":1}},"FOR_BODY":{"null":{"_total":1,"BlockStatement":1},"BlockStatement":{"B":{"_total":1,"VariableDeclaration":1}}},"F":{"null":{"_total":1,"_end":1}}},"WhileStatement":{"WHILE_TEST":{"null":{"_total":1,"BinaryExpression":1}},"WHILE_BODY":{"null":{"_total":1,"BlockStatement":1},"BlockStatement":{"B":{"_total":1,"VariableDeclaration":1}}},"F":{"null":{"_total":1,"_end":1}}},"FunctionDeclaration":{"FUNC_BODY":{"null":{"_total":1,"BlockStatement":1},"BlockStatement":{"B":{"_total":1,"VariableDeclaration":1}}},"F":{"null":{"_total":1,"_end":1}}}}},"VariableDeclaration":{"F":{"VariableDeclaration":{"F":{"VariableDeclaration":{"F":{"_total":3,"VariableDeclaration":2,"_end":1}}}},"IfStatement":{"IF_C":{"BlockStatement":{"B":{"_total":3,"ExpressionStatement":3}}}},"FunctionDeclaration":{"FUNC_BODY":{"BlockStatement":{"B":{"_total":1,"IfStatement":1}}},"F":{"FunctionDeclaration":{"FUNC_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"ExpressionStatement":1}}}}}},"IfStatement":{"IF_C":{"BlockStatement":{"B":{"VariableDeclaration":{"F":{"_total":1,"_end":1}},"ExpressionStatement":{"EXPR":{"_total":5,"AssignmentExpression":5},"F":{"_total":5,"_end":5}}}}},"IF_A":{"BlockStatement":{"B":{"ExpressionStatement":{"EXPR":{"_total":1,"AssignmentExpression":1},"F":{"_total":1,"_end":1}}}}}},"ForStatement":{"FOR_BODY":{"BlockStatement":{"B":{"VariableDeclaration":{"F":{"_total":1,"IfStatement":1}},"ExpressionStatement":{"EXPR":{"_total":1,"CallExpression":1},"F":{"_total":1,"_end":1}}}}}},"BlockStatement":{"B":{"VariableDeclaration":{"F":{"IfStatement":{"IF_T":{"_total":3,"BinaryExpression":3},"IF_C":{"_total":3,"BlockStatement":3},"IF_A":{"_total":3,"_end":3},"F":{"_total":3,"_end":3}}}},"IfStatement":{"IF_C":{"BlockStatement":{"B":{"_total":1,"ExpressionStatement":1}}},"IF_A":{"BlockStatement":{"B":{"_total":1,"ExpressionStatement":1}}}},"ForStatement":{"FOR_BODY":{"BlockStatement":{"B":{"_total":1,"ExpressionStatement":1}}}}}},"WhileStatement":{"WHILE_BODY":{"BlockStatement":{"B":{"VariableDeclaration":{"F":{"_total":1,"IfStatement":1}}}}}},"FunctionDeclaration":{"FUNC_BODY":{"BlockStatement":{"B":{"VariableDeclaration":{"F":{"_total":1,"IfStatement":1}},"IfStatement":{"IF_T":{"_total":1,"BinaryExpression":1},"IF_C":{"_total":1,"BlockStatement":1},"IF_A":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}},"ForStatement":{"FOR_INIT":{"_total":1,"VariableDeclaration":1},"FOR_TEST":{"_total":1,"BinaryExpression":1},"FOR_UPDATE":{"_total":1,"UpdateExpression":1},"FOR_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}}}}},"F":{"FunctionDeclaration":{"FUNC_BODY":{"BlockStatement":{"B":{"_total":1,"ForStatement":1}}},"F":{"ExpressionStatement":{"EXPR":{"_total":1,"AssignmentExpression":1},"F":{"_total":1,"IfStatement":1}}}},"ExpressionStatement":{"F":{"IfStatement":{"IF_T":{"_total":1,"BinaryExpression":1},"IF_C":{"_total":1,"BlockStatement":1},"IF_A":{"_total":1,"_end":1},"F":{"_total":1,"_end":1}}}}}},"ExpressionStatement":{"F":{"IfStatement":{"IF_C":{"BlockStatement":{"B":{"_total":1,"ExpressionStatement":1}}}}}}};
 //var m = {"Program":{"B":{"null":{"null":{"_total":1,"WhileStatement":1}},"VariableDeclaration":{"F":{"null":{"_total":1,"VariableDeclaration":1},"VariableDeclaration":{"F":{"_total":1,"VariableDeclaration":1}}}},"IfStatement":{"IF_T":{"null":{"_total":1,"BinaryExpression":1}},"IF_C":{"null":{"_total":1,"BlockStatement":1},"BlockStatement":{"B":{"_total":1,"VariableDeclaration":1}}},"IF_A":{"null":{"_total":1,"ExpressionStatement":1},"ExpressionStatement":{"EXPR":{"_total":1,"AssignmentExpression":1}}},"F":{"null":{"_total":1,"_end":1}}},"ForStatement":{"FOR_INIT":{"null":{"_total":1,"VariableDeclaration":1}},"FOR_TEST":{"null":{"_total":1,"BinaryExpression":1}},"FOR_UPDATE":{"null":{"_total":1,"UpdateExpression":1}},"FOR_BODY":{"null":{"_total":1,"BlockStatement":1},"BlockStatement":{"B":{"_total":1,"VariableDeclaration":1}}},"F":{"null":{"_total":1,"_end":1}}},"WhileStatement":{"WHILE_TEST":{"null":{"_total":1,"BinaryExpression":1}},"WHILE_BODY":{"null":{"_total":1,"BlockStatement":1},"BlockStatement":{"B":{"_total":1,"VariableDeclaration":1}}},"F":{"null":{"_total":1,"_end":1}}}}},"VariableDeclaration":{"F":{"VariableDeclaration":{"F":{"VariableDeclaration":{"F":{"_total":3,"VariableDeclaration":2,"_end":1}}}},"IfStatement":{"IF_C":{"BlockStatement":{"B":{"_total":2,"ExpressionStatement":2}}}}}},"IfStatement":{"IF_C":{"BlockStatement":{"B":{"VariableDeclaration":{"F":{"_total":1,"_end":1}},"ExpressionStatement":{"EXPR":{"_total":2,"AssignmentExpression":2},"F":{"_total":2,"_end":2}}}}}},"ForStatement":{"FOR_BODY":{"BlockStatement":{"B":{"VariableDeclaration":{"F":{"_total":1,"IfStatement":1}}}}}},"BlockStatement":{"B":{"VariableDeclaration":{"F":{"IfStatement":{"IF_T":{"_total":2,"BinaryExpression":2},"IF_C":{"_total":2,"BlockStatement":2},"IF_A":{"_total":2,"_end":2},"F":{"_total":2,"_end":2}}}}}},"WhileStatement":{"WHILE_BODY":{"BlockStatement":{"B":{"VariableDeclaration":{"F":{"_total":1,"IfStatement":1}}}}}}};
 
-var m = {"Program":{"B":{"null":{"_total":6,"VariableDeclaration":2,"IfStatement":1,"ForStatement":1,"WhileStatement":1,"FunctionDeclaration":1},"VariableDeclaration":{"F":{"_total":2,"VariableDeclaration":1,"ExpressionStatement":1}},"IfStatement":{"IF_T":{"_total":1,"BinaryExpression":1},"IF_C":{"_total":1,"BlockStatement":1},"IF_A":{"_total":1,"ExpressionStatement":1},"F":{"_total":1,"_end":1}},"ForStatement":{"FOR_INIT":{"_total":1,"VariableDeclaration":1},"FOR_TEST":{"_total":1,"BinaryExpression":1},"FOR_UPDATE":{"_total":1,"UpdateExpression":1},"FOR_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}},"WhileStatement":{"WHILE_TEST":{"_total":1,"BinaryExpression":1},"WHILE_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}},"FunctionDeclaration":{"FUNC_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}}}},"VariableDeclaration":{"F":{"VariableDeclaration":{"F":{"_total":4,"VariableDeclaration":3,"_end":1}},"IfStatement":{"IF_T":{"_total":3,"BinaryExpression":3},"IF_C":{"_total":3,"BlockStatement":3},"IF_A":{"_total":3,"_end":3},"F":{"_total":3,"_end":3}},"ExpressionStatement":{"EXPR":{"_total":1,"AssignmentExpression":1},"F":{"_total":1,"FunctionDeclaration":1}}}},"IfStatement":{"IF_C":{"BlockStatement":{"B":{"_total":6,"VariableDeclaration":1,"ExpressionStatement":5}}},"IF_A":{"ExpressionStatement":{"EXPR":{"_total":1,"AssignmentExpression":1}},"BlockStatement":{"B":{"_total":1,"ExpressionStatement":1}}}},"BlockStatement":{"B":{"VariableDeclaration":{"F":{"_total":4,"_end":1,"IfStatement":3}},"ExpressionStatement":{"EXPR":{"_total":7,"AssignmentExpression":6,"CallExpression":1},"F":{"_total":7,"_end":7}},"IfStatement":{"IF_T":{"_total":1,"BinaryExpression":1},"IF_C":{"_total":1,"BlockStatement":1},"IF_A":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}},"ForStatement":{"FOR_INIT":{"_total":1,"VariableDeclaration":1},"FOR_TEST":{"_total":1,"BinaryExpression":1},"FOR_UPDATE":{"_total":1,"UpdateExpression":1},"FOR_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}}}},"ExpressionStatement":{"EXPR":{"AssignmentExpression":{"AE_LEFT":{"_total":9,"Identifier":9},"AE_RIGHT":{"_total":9,"Literal":7,"AssignmentExpression":1,"CallExpression":1}}},"F":{"FunctionDeclaration":{"FUNC_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"FunctionDeclaration":1}},"IfStatement":{"IF_T":{"_total":1,"BinaryExpression":1},"IF_C":{"_total":1,"BlockStatement":1},"IF_A":{"_total":1,"_end":1},"F":{"_total":1,"_end":1}}}},"ForStatement":{"FOR_BODY":{"BlockStatement":{"B":{"_total":2,"VariableDeclaration":1,"ExpressionStatement":1}}}},"WhileStatement":{"WHILE_BODY":{"BlockStatement":{"B":{"_total":1,"VariableDeclaration":1}}}},"FunctionDeclaration":{"FUNC_BODY":{"BlockStatement":{"B":{"_total":3,"VariableDeclaration":1,"IfStatement":1,"ForStatement":1}}},"F":{"FunctionDeclaration":{"FUNC_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"ExpressionStatement":1}},"ExpressionStatement":{"EXPR":{"_total":1,"AssignmentExpression":1},"F":{"_total":1,"IfStatement":1}}}},"AssignmentExpression":{"AE_RIGHT":{"AssignmentExpression":{"AE_LEFT":{"_total":1,"Identifier":1},"AE_RIGHT":{"_total":1,"Literal":1}}}}};
+var m = {"Program":{"B":{"null":{"_total":6,"VariableDeclaration":2,"IfStatement":1,"ForStatement":1,"WhileStatement":1,"FunctionDeclaration":1},"VariableDeclaration":{"VD_INIT":{"_total":2,"Literal":2},"F":{"_total":2,"VariableDeclaration":1,"ExpressionStatement":1}},"IfStatement":{"IF_T":{"_total":1,"BinaryExpression":1},"IF_C":{"_total":1,"BlockStatement":1},"IF_A":{"_total":1,"ExpressionStatement":1},"F":{"_total":1,"_end":1}},"ForStatement":{"FOR_INIT":{"_total":1,"VariableDeclaration":1},"FOR_TEST":{"_total":1,"BinaryExpression":1},"FOR_UPDATE":{"_total":1,"UpdateExpression":1},"FOR_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}},"WhileStatement":{"WHILE_TEST":{"_total":1,"BinaryExpression":1},"WHILE_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}},"FunctionDeclaration":{"FUNC_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}}}},"VariableDeclaration":{"F":{"VariableDeclaration":{"VD_INIT":{"_total":4,"Literal":4},"F":{"_total":4,"VariableDeclaration":3,"_end":1}},"IfStatement":{"IF_T":{"_total":3,"BinaryExpression":3},"IF_C":{"_total":3,"BlockStatement":3},"IF_A":{"_total":3,"_end":3},"F":{"_total":3,"_end":3}},"ExpressionStatement":{"EXPR":{"_total":1,"AssignmentExpression":1},"F":{"_total":1,"FunctionDeclaration":1}}},"VD_INIT":{"FunctionExpression":{"FUNC_E_BODY":{"_total":1,"BlockStatement":1}}}},"IfStatement":{"IF_T":{"BinaryExpression":{"BE_LEFT":{"_total":6,"Identifier":6},"BE_RIGHT":{"_total":6,"Literal":6}}},"IF_C":{"BlockStatement":{"B":{"_total":6,"VariableDeclaration":1,"ExpressionStatement":5}}},"IF_A":{"ExpressionStatement":{"EXPR":{"_total":1,"AssignmentExpression":1}},"BlockStatement":{"B":{"_total":1,"ExpressionStatement":1}}}},"BlockStatement":{"B":{"VariableDeclaration":{"VD_INIT":{"_total":4,"Literal":3,"FunctionExpression":1},"F":{"_total":4,"_end":1,"IfStatement":3}},"ExpressionStatement":{"EXPR":{"_total":7,"AssignmentExpression":6,"CallExpression":1},"F":{"_total":7,"_end":7}},"IfStatement":{"IF_T":{"_total":1,"BinaryExpression":1},"IF_C":{"_total":1,"BlockStatement":1},"IF_A":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}},"ForStatement":{"FOR_INIT":{"_total":1,"VariableDeclaration":1},"FOR_TEST":{"_total":1,"BinaryExpression":1},"FOR_UPDATE":{"_total":1,"UpdateExpression":1},"FOR_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}}}},"ExpressionStatement":{"EXPR":{"AssignmentExpression":{"AE_LEFT":{"_total":9,"Identifier":9},"AE_RIGHT":{"_total":9,"Literal":7,"AssignmentExpression":1,"CallExpression":1}}},"F":{"FunctionDeclaration":{"FUNC_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"FunctionDeclaration":1}},"IfStatement":{"IF_T":{"_total":1,"BinaryExpression":1},"IF_C":{"_total":1,"BlockStatement":1},"IF_A":{"_total":1,"_end":1},"F":{"_total":1,"_end":1}}}},"ForStatement":{"FOR_INIT":{"VariableDeclaration":{"VD_INIT":{"_total":2,"Literal":2}}},"FOR_TEST":{"BinaryExpression":{"BE_LEFT":{"_total":2,"Identifier":2},"BE_RIGHT":{"_total":2,"Literal":2}}},"FOR_BODY":{"BlockStatement":{"B":{"_total":2,"VariableDeclaration":1,"ExpressionStatement":1}}}},"WhileStatement":{"WHILE_TEST":{"BinaryExpression":{"BE_LEFT":{"_total":1,"Identifier":1},"BE_RIGHT":{"_total":1,"Literal":1}}},"WHILE_BODY":{"BlockStatement":{"B":{"_total":1,"VariableDeclaration":1}}}},"FunctionDeclaration":{"FUNC_BODY":{"BlockStatement":{"B":{"_total":3,"VariableDeclaration":1,"IfStatement":1,"ForStatement":1}}},"F":{"FunctionDeclaration":{"FUNC_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"ExpressionStatement":1}},"ExpressionStatement":{"EXPR":{"_total":1,"AssignmentExpression":1},"F":{"_total":1,"IfStatement":1}}}},"FunctionExpression":{"FUNC_E_BODY":{"BlockStatement":{"B":{"_total":1,"_end":1}}}},"AssignmentExpression":{"AE_RIGHT":{"AssignmentExpression":{"AE_LEFT":{"_total":1,"Identifier":1},"AE_RIGHT":{"_total":1,"Literal":1}}}}};
 
 // console.log(JSON.stringify(m, null, 2));
 var syntax = generateProgram(m);

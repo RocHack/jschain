@@ -12,7 +12,7 @@ var parseFunctions =
 'ForStatement':parseFor,
 'WhileStatement':parseWhile,
 'FunctionDeclaration':parseFunc,
-'FunctionExpression':parseFunc,
+'FunctionExpression':parseFuncExp,
 'ExpressionStatement':parseES,
 'CallExpression':parseCall};
 
@@ -33,10 +33,16 @@ var WHILE_TEST = "WHILE_TEST";
 var WHILE_BODY = "WHILE_BODY";
 
 var FUNC_BODY = "FUNC_BODY";
+var FUNC_E_BODY = "FUNC_E_BODY";
 
 var EXPR = "EXPR";
 var AE_LEFT = "AE_LEFT";
 var AE_RIGHT = "AE_RIGHT";
+
+var BE_LEFT = "BE_LEFT";
+var BE_RIGHT = "BE_RIGHT";
+
+var VD_INIT = "VD_INIT";
 
 var END_NODE = {type:"_end"};
 
@@ -91,14 +97,17 @@ function parseEnd(end, path)
 {
 }
 
-function parseVD(vd, path) //VariableDeclaration
+function parseVD(node, path) //VariableDeclaration
 {
+	parseNode(node.declarations[0].init, path.concat(node.type, VD_INIT));
 	//store declarations information
 }
 
 function parseBE(node, path) //BinaryExpression
 {
 	//store operator, lhs and rhs information
+	parseNode(node.left, path.concat(node.type, BE_LEFT));
+	parseNode(node.right, path.concat(node.type, BE_RIGHT));
 }
 
 function parseAE(node, path) //AssignmentExpression
@@ -160,6 +169,12 @@ function parseFunc(node, path)
 {
 	//params?
 	parseNode(node.body, path.concat([node.type, FUNC_BODY]));
+}
+
+function parseFuncExp(node, path)
+{
+	//params?
+	parseNode(node.body, path.concat([node.type, FUNC_E_BODY]));
 }
 
 function parseProgram(program)
