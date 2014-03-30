@@ -1,9 +1,6 @@
 var parse = require("../parse");
 var assert = require("assert")
 describe('Parser', function(){
-	beforeEach(function(){
-		parse.reset();
-	})
 
 	it('should work w VD', function(){
 		var vd = parse.parseFile('var answer = 42; var a = 30; var b = 20; var c = 1; var d = 2;',3);
