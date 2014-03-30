@@ -13,7 +13,8 @@ var parseFunctions =
 'WhileStatement':parseWhile,
 'FunctionDeclaration':parseFunc,
 'FunctionExpression':parseFunc,
-'ExpressionStatement':parseES};
+'ExpressionStatement':parseES,
+'CallExpression':parseCall};
 
 var hash = {};
 
@@ -40,13 +41,14 @@ var END_NODE = {type:"_end"};
 var TOTAL = "_total";
 
 
-var DEPTH, DEFAULT_DEPTH = 3;
+var DEPTH, DEFAULT_DEPTH = 2;
 
-var ret = parseFile('var answer = 42; var a = 30; var b = 20; var c = 1; var d = 2;',3);
-var ret = parseFile("if (a=='5') { var a = 10; } else b = 3;",3);
-var ret = parseFile("for (var i = 0; i < 5; i++) { var a = 4; if (a == '5') { b = 5; } }", 3);
-var ret = parseFile("while (i < 0) { var a = 4; if (a == '5') { b = 5; } }",3);
-var ret = parseFile("function foo () { var a = function () {}; if (a == '5') { b = 5; } }",3);
+var ret = parseFile('var answer = 42; var a = 30; var b = 20; var c = 1; var d = 2;');
+var ret = parseFile("if (a=='5') { var a = 10; } else b = 3;");
+var ret = parseFile("for (var i = 0; i < 5; i++) { var a = 4; if (a == '5') { b = 5; } }");
+var ret = parseFile("while (i < 0) { var a = 4; if (a == '5') { b = 5; } }");
+var ret = parseFile("function foo () { var a = function () {}; if (a == '5') { b = 5; } }");
+var ret = parseFile("var hi = 3; function foo () { if (a == '5') { b = 5; } else { hi = 2; } } function test () { for (var i = 0; i < 3; i++) { test(); } } hi = 1; if (hi == 2) { hi = 2; }");
 
 // var json = JSON.stringify(ret, null, 2);
 // console.log(json);
@@ -103,6 +105,10 @@ function parseAS(node, path) //AssignmentExpression
 function parseES(node, path) //ExpressionStatement
 {
 	parseNode(node.expression, path.concat(node.type, EXPR));
+}
+
+function parseCall(node, path)
+{
 }
 
 function parseIf(node, path)
