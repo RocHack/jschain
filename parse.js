@@ -15,7 +15,9 @@ var parseFunctions =
 'FunctionExpression':parseFuncExp,
 'ExpressionStatement':parseES,
 'CallExpression':parseCall,
-'ReturnStatement':parseReturn};
+'ReturnStatement':parseReturn,
+'UpdateExpression':parseUE,
+'MemberExpression':parseME};
 
 var hash = {};
 
@@ -44,9 +46,18 @@ var BE_LEFT = "BE_LEFT";
 var BE_RIGHT = "BE_RIGHT";
 var BE_OP = "BE_OP";
 
+var ME_OBJ = "ME_OBJ";
+var ME_PROP = "ME_PROP";
+var ME_COMPUTED = "ME_COMPUTED";
+
+var CALL_CALLEE = "CALL_CALLEE";
+
 var VD_INIT = "VD_INIT";
 
 var RET_ARG = "RET_ARG";
+
+var UPDATE_ARG = "UPDATE_ARG";
+var UPDATE_OP = "UPDATE_OP";
 
 var END_NODE = {type:"_end"};
 
@@ -56,12 +67,12 @@ var TOTAL = "_total";
 var DEPTH, DEFAULT_DEPTH = 2;
 
 
-var ret = parseFile('var answer = 42; var a = 30; var b = 20; var c = 1; var d = 2;');
+var ret = parseFile('var answer = x.b(); var a = x.foo(); var b = 20; var c = 1; var d = 2;');
 var ret = parseFile("if (a=='5') { var a = 10; } else b = 3;");
-var ret = parseFile("for (var i = 0; i < 5; i++) { var a = 4; if (a == '5') { b = 5; } }");
-var ret = parseFile("while (i > 0) { var a = 4; if (a > 5) { b = 5; } }");
+var ret = parseFile("for (var i = 0; i < 5; i++) { var a = x; if (a == '5') { b = 5; } }");
+var ret = parseFile("while (i > 0) { var a = 4; if (a > 5) { b = 5; } i--; }");
 var ret = parseFile("function foo () { var a = function () { return 5; }; if (a == '5') { b = 5; } }");
-var ret = parseFile("var hi = {}; h = (a = 3); function foo () { if (a == '5') { b = foo(); } else { hi = 2; } return b; } function test () { for (var i = 0; i > 3; i++) { test(); } } hi = 1; if (hi == 2) { hi = 2; }");
+var ret = parseFile("var hi = {}; h = (a = 3); function foo () { if (a == '5') { b = foo(); } else { hi = 2; } return b; } function test () { for (var i = a; i > 3; i--) { test(); } } hi = 1; if (hi == 2) { hi = 2; }");
 
 // var json = JSON.stringify(ret, null, 2);
 // console.log(json);
@@ -130,11 +141,25 @@ function parseES(node, path) //ExpressionStatement
 
 function parseCall(node, path)
 {
+	parseNode(node.callee, path.concat(node.type, CALL_CALLEE));
 }
 
 function parseReturn(node, path)
 {
 	parseNode(node.argument, path.concat(node.type, RET_ARG));
+}
+
+function parseUE(node, path)
+{
+	parseNode(node.operator, path.concat(node.type, UPDATE_OP));
+	parseNode(node.argument, path.concat(node.type, UPDATE_ARG));
+}
+
+function parseME(node, path)
+{
+	parseNode(node.object, path.concat(node.type, ME_OBJ));
+	parseNode(node.property, path.concat(node.type, ME_PROP));
+	parseNode(node.computed, path.concat(node.type, ME_COMPUTED));
 }
 
 function parseIf(node, path)
