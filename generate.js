@@ -16,6 +16,8 @@ var WHILE_BODY = "WHILE_BODY";
 
 var FUNC_BODY = "FUNC_BODY";
 
+var EXPR = "EXPR";
+
 var END = "_end";
 
 var DEPTH = 3;
@@ -27,7 +29,14 @@ var generateFunctions = {
 	'VariableDeclaration': generateVDeclaration,
 	'EmptyExpression': generateEE,
 	'BlockStatement': generateBS,
-	'ForStatement': generateFor
+	'ForStatement': generateFor,
+	'WhileStatement': generateWhile,
+	'BinaryExpression': generateBE,
+	'UpdateExpression': generateUE,
+	'IfStatement': generateIf,
+	'AssignmentExpression': generateAE,
+	'ExpressionStatement': generateES,
+	'_end': generateEnd
 };
 
 function generateNode(model, path)
@@ -79,6 +88,45 @@ function generateEE()
 	return {type: "EmptyExpression"};
 }
 
+function generateWhile(model, path)
+{
+	return {
+        type: "WhileStatement",
+        test: generateNode(model, path.concat(WHILE_TEST)),
+        body: generateNode(model, path.concat(WHILE_BODY))
+    }
+}
+
+function generateES(model, path)
+{
+	return {
+	    "type": "ExpressionStatement",
+	    "expression": generateNode(model, path.concat(EXPR))
+	}
+}
+
+function generateEnd()
+{
+	return null;
+}
+
+function generateAE()
+{
+	return {
+	    "type": "AssignmentExpression",
+	    "operator": "=",
+	    "left": {
+	        "type": "Identifier",
+	        "name": "ID"
+	    },
+	    "right": {
+	        "type": "Literal",
+	        "value": 0,
+	        "raw": "0"
+	    }
+	}
+}
+
 function generateBlock(model, path)
 {
 	var sPath = path.concat(BODY);
@@ -91,6 +139,45 @@ function generateBlock(model, path)
 		statement = generateNode(model, sPath);
 	}
 	return statements;
+}
+
+function generateIf(model, path)
+{
+	return {
+        "type": "IfStatement",
+        "test": generateNode(model, path.concat(IF_TEST)),
+        "consequent": generateNode(model, path.concat(IF_CONS)),
+        "alternate": generateNode(model, path.concat(IF_ALT))
+    }
+}
+
+function generateBE(model, path)
+{
+	return {
+	    "type": "BinaryExpression",
+	    "operator": "<",
+	    "left": {
+	        "type": "Identifier",
+	        "name": "ID"
+	    },
+	    "right": {
+	        "type": "Literal",
+	        "value": 0,
+	        "raw": "0"
+	    }
+	}
+}
+
+function generateUE(model, path)
+{
+	return {
+        "type": "UpdateExpression",
+        "operator": "++",
+        "argument": {
+            "type": "Identifier",
+            "name": "ID"
+        }
+    }
 }
 
 function generateProgram(model)
@@ -157,7 +244,6 @@ function generateBS(model, path)
 
 function generateFor(model, path)
 {
-	console.log("generating for, path = ",path, " concatted = ",path.concat([FOR_INIT]));
 	return {
         type: "ForStatement",
         init: generateNode(model, path.concat(FOR_INIT)),
@@ -217,9 +303,12 @@ var m = {
 
 */
 
-// var m = {"Program":{"B":{"null":{"null":{"_total":1,"ForStatement":1}},"ForStatement":{"FOR_INIT":{"null":{"_total":1,"VariableDeclaration":1}},"FOR_TEST":{"null":{"_total":1,"BinaryExpression":1}},"FOR_UPDATE":{"null":{"_total":1,"UpdateExpression":1}},"FOR_BODY":{"null":{"_total":1,"BlockStatement":1},"BlockStatement":{"B":{"_total":1,"VariableDeclaration":1}}},"F":{"null":{"_total":1,"_end":1}}}}},"ForStatement":{"FOR_BODY":{"BlockStatement":{"B":{"VariableDeclaration":{"F":{"_total":1,"IfStatement":1}}}}}},"BlockStatement":{"B":{"VariableDeclaration":{"F":{"IfStatement":{"IF_T":{"_total":1,"BinaryExpression":1},"IF_C":{"_total":1,"BlockStatement":1},"IF_A":{"_total":1,"_end":1},"F":{"_total":1,"_end":1}}}}}},"VariableDeclaration":{"F":{"IfStatement":{"IF_C":{"BlockStatement":{"B":{"_total":1,"AssignmentExpression":1}}}}}},"IfStatement":{"IF_C":{"BlockStatement":{"B":{"ExpressionStatement":{"F":{"_total":1,"_end":1}}}}}}};
-// var syntax = generateProgram(m);
-// console.log(JSON.stringify(syntax, null, 2));
-// console.log(escodegen.generate(syntax));
+ var m = {"Program":{"B":{"null":{"null":{"_total":1,"ForStatement":1}},"VariableDeclaration":{"F":{"null":{"_total":1,"VariableDeclaration":1},"VariableDeclaration":{"F":{"_total":1,"VariableDeclaration":1}}}},"IfStatement":{"IF_T":{"null":{"_total":1,"BinaryExpression":1}},"IF_C":{"null":{"_total":1,"BlockStatement":1},"BlockStatement":{"B":{"_total":1,"VariableDeclaration":1}}},"IF_A":{"null":{"_total":1,"ExpressionStatement":1},"ExpressionStatement":{"EXPR":{"_total":1,"AssignmentExpression":1}}},"F":{"null":{"_total":1,"_end":1}}},"ForStatement":{"FOR_INIT":{"null":{"_total":1,"VariableDeclaration":1}},"FOR_TEST":{"null":{"_total":1,"BinaryExpression":1}},"FOR_UPDATE":{"null":{"_total":1,"UpdateExpression":1}},"FOR_BODY":{"null":{"_total":1,"BlockStatement":1},"BlockStatement":{"B":{"_total":1,"VariableDeclaration":1}}},"F":{"null":{"_total":1,"_end":1}}}}},"VariableDeclaration":{"F":{"VariableDeclaration":{"F":{"VariableDeclaration":{"F":{"_total":3,"VariableDeclaration":2,"_end":1}}}},"IfStatement":{"IF_C":{"BlockStatement":{"B":{"_total":1,"ExpressionStatement":1}}}}}},"IfStatement":{"IF_C":{"BlockStatement":{"B":{"VariableDeclaration":{"F":{"_total":1,"_end":1}},"ExpressionStatement":{"EXPR":{"_total":1,"AssignmentExpression":1},"F":{"_total":1,"_end":1}}}}}},"ForStatement":{"FOR_BODY":{"BlockStatement":{"B":{"VariableDeclaration":{"F":{"_total":1,"IfStatement":1}}}}}},"BlockStatement":{"B":{"VariableDeclaration":{"F":{"IfStatement":{"IF_T":{"_total":1,"BinaryExpression":1},"IF_C":{"_total":1,"BlockStatement":1},"IF_A":{"_total":1,"_end":1},"F":{"_total":1,"_end":1}}}}}}};
+//var m = {"Program":{"B":{"null":{"null":{"_total":1,"WhileStatement":1}},"VariableDeclaration":{"F":{"null":{"_total":1,"VariableDeclaration":1},"VariableDeclaration":{"F":{"_total":1,"VariableDeclaration":1}}}},"IfStatement":{"IF_T":{"null":{"_total":1,"BinaryExpression":1}},"IF_C":{"null":{"_total":1,"BlockStatement":1},"BlockStatement":{"B":{"_total":1,"VariableDeclaration":1}}},"IF_A":{"null":{"_total":1,"ExpressionStatement":1},"ExpressionStatement":{"EXPR":{"_total":1,"AssignmentExpression":1}}},"F":{"null":{"_total":1,"_end":1}}},"ForStatement":{"FOR_INIT":{"null":{"_total":1,"VariableDeclaration":1}},"FOR_TEST":{"null":{"_total":1,"BinaryExpression":1}},"FOR_UPDATE":{"null":{"_total":1,"UpdateExpression":1}},"FOR_BODY":{"null":{"_total":1,"BlockStatement":1},"BlockStatement":{"B":{"_total":1,"VariableDeclaration":1}}},"F":{"null":{"_total":1,"_end":1}}},"WhileStatement":{"WHILE_TEST":{"null":{"_total":1,"BinaryExpression":1}},"WHILE_BODY":{"null":{"_total":1,"BlockStatement":1},"BlockStatement":{"B":{"_total":1,"VariableDeclaration":1}}},"F":{"null":{"_total":1,"_end":1}}}}},"VariableDeclaration":{"F":{"VariableDeclaration":{"F":{"VariableDeclaration":{"F":{"_total":3,"VariableDeclaration":2,"_end":1}}}},"IfStatement":{"IF_C":{"BlockStatement":{"B":{"_total":2,"ExpressionStatement":2}}}}}},"IfStatement":{"IF_C":{"BlockStatement":{"B":{"VariableDeclaration":{"F":{"_total":1,"_end":1}},"ExpressionStatement":{"EXPR":{"_total":2,"AssignmentExpression":2},"F":{"_total":2,"_end":2}}}}}},"ForStatement":{"FOR_BODY":{"BlockStatement":{"B":{"VariableDeclaration":{"F":{"_total":1,"IfStatement":1}}}}}},"BlockStatement":{"B":{"VariableDeclaration":{"F":{"IfStatement":{"IF_T":{"_total":2,"BinaryExpression":2},"IF_C":{"_total":2,"BlockStatement":2},"IF_A":{"_total":2,"_end":2},"F":{"_total":2,"_end":2}}}}}},"WhileStatement":{"WHILE_BODY":{"BlockStatement":{"B":{"VariableDeclaration":{"F":{"_total":1,"IfStatement":1}}}}}}};
+
+console.log(JSON.stringify(m, null, 2));
+var syntax = generateProgram(m);
+console.log(JSON.stringify(syntax, null, 2));
+console.log(escodegen.generate(syntax));
 
 module.exports.generateProgram = generateProgram;

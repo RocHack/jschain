@@ -12,7 +12,8 @@ var parseFunctions =
 'ForStatement':parseFor,
 'WhileStatement':parseWhile,
 'FunctionDeclaration':parseFunc,
-'FunctionExpression':parseFunc};
+'FunctionExpression':parseFunc,
+'ExpressionStatement':parseES};
 
 var hash = {};
 
@@ -32,6 +33,8 @@ var WHILE_BODY = "WHILE_BODY";
 
 var FUNC_BODY = "FUNC_BODY";
 
+var EXPR = "EXPR";
+
 var END_NODE = {type:"_end"};
 
 var TOTAL = "_total";
@@ -43,11 +46,11 @@ var ret = parseFile('var answer = 42; var a = 30; var b = 20; var c = 1; var d =
 var ret = parseFile("if (a=='5') { var a = 10; } else b = 3;",3);
 var ret = parseFile("for (var i = 0; i < 5; i++) { var a = 4; if (a == '5') { b = 5; } }", 3);
 var ret = parseFile("while (i < 0) { var a = 4; if (a == '5') { b = 5; } }",3);
-var ret = parseFile("function foo () { var a = function () {}; if (a == '5') { b = 5; } }",3);
+// var ret = parseFile("function foo () { var a = function () {}; if (a == '5') { b = 5; } }",3);
 
-var json = JSON.stringify(ret, null, 2);
-console.log(json);
-// console.log(JSON.stringify(ret));
+// var json = JSON.stringify(ret, null, 2);
+// console.log(json);
+console.log(JSON.stringify(ret));
 
 function traverse(path)
 {
@@ -98,12 +101,9 @@ function parseAS(node, path) //AssignmentExpression
 	//store lhs, rhs
 }
 
-function realNode(node)
+function parseES(node, path) //ExpressionStatement
 {
-	if (node.type == "ExpressionStatement")
-		return node.expression;
-
-	return node;
+	parseNode(node.expression, path.concat(node.type, EXPR));
 }
 
 function parseIf(node, path)
@@ -158,7 +158,6 @@ function parseProgram(program)
 
 function parseNode(node, path)
 {
-	node = realNode(node);
 	if (path)
 		addCount(node, path);
 	console.log("parsing ", node.type, " path=",path);
