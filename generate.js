@@ -66,7 +66,7 @@ function generateNode(model, path)
 		}
 	}
 	if (!type) {
-		console.log("Unable to pick node type at", path, " map = ", map);
+		//console.log("Unable to pick node type at", path, " map = ", map);
 		throw new Error("Unable to pick node type at", path);
 	}
 
@@ -319,8 +319,8 @@ var m = {
 var m = {"Program":{"B":{"null":{"_total":6,"VariableDeclaration":2,"IfStatement":1,"ForStatement":1,"WhileStatement":1,"FunctionDeclaration":1},"VariableDeclaration":{"F":{"_total":2,"VariableDeclaration":1,"FunctionDeclaration":1}},"IfStatement":{"IF_T":{"_total":1,"BinaryExpression":1},"IF_C":{"_total":1,"BlockStatement":1},"IF_A":{"_total":1,"ExpressionStatement":1},"F":{"_total":1,"_end":1}},"ForStatement":{"FOR_INIT":{"_total":1,"VariableDeclaration":1},"FOR_TEST":{"_total":1,"BinaryExpression":1},"FOR_UPDATE":{"_total":1,"UpdateExpression":1},"FOR_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}},"WhileStatement":{"WHILE_TEST":{"_total":1,"BinaryExpression":1},"WHILE_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}},"FunctionDeclaration":{"FUNC_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}}}},"VariableDeclaration":{"F":{"VariableDeclaration":{"F":{"_total":4,"VariableDeclaration":3,"_end":1}},"IfStatement":{"IF_T":{"_total":3,"BinaryExpression":3},"IF_C":{"_total":3,"BlockStatement":3},"IF_A":{"_total":3,"_end":3},"F":{"_total":3,"_end":3}},"FunctionDeclaration":{"FUNC_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"FunctionDeclaration":1}}}},"IfStatement":{"IF_C":{"BlockStatement":{"B":{"_total":6,"VariableDeclaration":1,"ExpressionStatement":5}}},"IF_A":{"ExpressionStatement":{"EXPR":{"_total":1,"AssignmentExpression":1}},"BlockStatement":{"B":{"_total":1,"ExpressionStatement":1}}}},"BlockStatement":{"B":{"VariableDeclaration":{"F":{"_total":4,"_end":1,"IfStatement":3}},"ExpressionStatement":{"EXPR":{"_total":7,"AssignmentExpression":6,"CallExpression":1},"F":{"_total":7,"_end":7}},"IfStatement":{"IF_T":{"_total":1,"BinaryExpression":1},"IF_C":{"_total":1,"BlockStatement":1},"IF_A":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}},"ForStatement":{"FOR_INIT":{"_total":1,"VariableDeclaration":1},"FOR_TEST":{"_total":1,"BinaryExpression":1},"FOR_UPDATE":{"_total":1,"UpdateExpression":1},"FOR_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}}}},"ForStatement":{"FOR_BODY":{"BlockStatement":{"B":{"_total":2,"VariableDeclaration":1,"ExpressionStatement":1}}}},"WhileStatement":{"WHILE_BODY":{"BlockStatement":{"B":{"_total":1,"VariableDeclaration":1}}}},"FunctionDeclaration":{"FUNC_BODY":{"BlockStatement":{"B":{"_total":3,"VariableDeclaration":1,"IfStatement":1,"ForStatement":1}}},"F":{"FunctionDeclaration":{"FUNC_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"ExpressionStatement":1}},"ExpressionStatement":{"EXPR":{"_total":1,"AssignmentExpression":1},"F":{"_total":1,"IfStatement":1}}}},"ExpressionStatement":{"F":{"IfStatement":{"IF_T":{"_total":1,"BinaryExpression":1},"IF_C":{"_total":1,"BlockStatement":1},"IF_A":{"_total":1,"_end":1},"F":{"_total":1,"_end":1}}}}};
 
 // console.log(JSON.stringify(m, null, 2));
-var syntax = generateProgram(m);
+// var syntax = generateProgram(m);
 // console.log(JSON.stringify(syntax, null, 2));
-console.log(escodegen.generate(syntax));
+// console.log(escodegen.generate(syntax));
 
 module.exports.generateProgram = generateProgram;

@@ -43,6 +43,7 @@ var TOTAL = "_total";
 
 var DEPTH, DEFAULT_DEPTH = 2;
 
+/*
 var ret = parseFile('var answer = 42; var a = 30; var b = 20; var c = 1; var d = 2;');
 var ret = parseFile("if (a=='5') { var a = 10; } else b = 3;");
 var ret = parseFile("for (var i = 0; i < 5; i++) { var a = 4; if (a == '5') { b = 5; } }");
@@ -53,6 +54,7 @@ var ret = parseFile("var hi = 3; function foo () { if (a == '5') { b = 5; } else
 // var json = JSON.stringify(ret, null, 2);
 // console.log(json);
 console.log(JSON.stringify(ret));
+*/
 
 function traverse(path)
 {
@@ -177,7 +179,7 @@ function parseFile(text, d)
 	// reset();
 
 	DEPTH = d || DEFAULT_DEPTH;
-	var syntax = esprima.parse(text);
+	var syntax = esprima.parse(text, {tolerant: true});
 	parseNode(syntax);
 	return hash;
 }
