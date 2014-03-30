@@ -1,4 +1,5 @@
 var esprima = require("esprima");
+var fs = require('fs');
 
 var parseFunctions = 
 {'Program':parseProgram, 
@@ -36,15 +37,16 @@ var END_NODE = {type:"_end"};
 var TOTAL = "_total";
 
 
-var DEPTH = 3;
+var DEPTH, DEFAULT_DEPTH = 3;
 
-// var ret = parseFile('var answer = 42; var a = 30; var b = 20; var c = 1; var d = 2;',3);
-// var ret = parseFile("if (a=='5') { var a = 10; } else b = 3;",3);
-//var ret = parseFile("for (var i = 0; i < 5; i++) { var a = 4; if (a == '5') { b = 5; } }");
-//var ret = parseFile("while (i < 0) { var a = 4; if (a == '5') { b = 5; } }");
-// var ret = parseFile("function foo () { var a = function () {}; if (a == '5') { b = 5; } }");
+var ret = parseFile('var answer = 42; var a = 30; var b = 20; var c = 1; var d = 2;',3);
+var ret = parseFile("if (a=='5') { var a = 10; } else b = 3;",3);
+var ret = parseFile("for (var i = 0; i < 5; i++) { var a = 4; if (a == '5') { b = 5; } }", 3);
+var ret = parseFile("while (i < 0) { var a = 4; if (a == '5') { b = 5; } }",3);
+var ret = parseFile("function foo () { var a = function () {}; if (a == '5') { b = 5; } }",3);
 
-// console.log(JSON.stringify(ret, null, 2));
+var json = JSON.stringify(ret, null, 2);
+console.log(json);
 // console.log(JSON.stringify(ret));
 
 function traverse(path)
@@ -168,7 +170,7 @@ function parseNode(node, path)
 
 function parseFile(text, d)
 {
-	DEPTH = d || 2;
+	DEPTH = d || DEFAULT_DEPTH;
 	var syntax = esprima.parse(text);
 	parseNode(syntax);
 	return hash;
