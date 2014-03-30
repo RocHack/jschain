@@ -50,7 +50,7 @@ var ret = parseFile("function foo () { var a = function () {}; if (a == '5') { b
 
 // var json = JSON.stringify(ret, null, 2);
 // console.log(json);
-// console.log(JSON.stringify(ret));
+console.log(JSON.stringify(ret));
 
 function traverse(path)
 {
@@ -67,7 +67,7 @@ function traverse(path)
 	//if the path wasn't long enough, have to append nulls to make it the required depth
 	var extras = DEPTH*2 - path.length;
 	for (; extras > 0; extras -= 2) //-=2 because we're subtracting from DEPTH*2, ie, 'program' & 'F'...
-		working = (working[null] = {});
+		working = working[null] || (working[null] = {});
 
 	working[TOTAL] = working[TOTAL] || 0;
 
@@ -168,8 +168,8 @@ function parseNode(node, path)
 
 function parseFile(text, d)
 {
-	reset();
-	
+	// reset();
+
 	DEPTH = d || DEFAULT_DEPTH;
 	var syntax = esprima.parse(text);
 	parseNode(syntax);
