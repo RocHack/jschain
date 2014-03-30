@@ -41,6 +41,7 @@ var AE_RIGHT = "AE_RIGHT";
 
 var BE_LEFT = "BE_LEFT";
 var BE_RIGHT = "BE_RIGHT";
+var BE_OP = "BE_OP";
 
 var VD_INIT = "VD_INIT";
 
@@ -55,9 +56,9 @@ var DEPTH, DEFAULT_DEPTH = 2;
 var ret = parseFile('var answer = 42; var a = 30; var b = 20; var c = 1; var d = 2;');
 var ret = parseFile("if (a=='5') { var a = 10; } else b = 3;");
 var ret = parseFile("for (var i = 0; i < 5; i++) { var a = 4; if (a == '5') { b = 5; } }");
-var ret = parseFile("while (i < 0) { var a = 4; if (a == '5') { b = 5; } }");
+var ret = parseFile("while (i > 0) { var a = 4; if (a > 5) { b = 5; } }");
 var ret = parseFile("function foo () { var a = function () {}; if (a == '5') { b = 5; } }");
-var ret = parseFile("var hi = 0; h = (a = 3); function foo () { if (a == '5') { b = foo(); } else { hi = 2; } } function test () { for (var i = 0; i < 3; i++) { test(); } } hi = 1; if (hi == 2) { hi = 2; }");
+var ret = parseFile("var hi = 0; h = (a = 3); function foo () { if (a == '5') { b = foo(); } else { hi = 2; } } function test () { for (var i = 0; i > 3; i++) { test(); } } hi = 1; if (hi == 2) { hi = 2; }");
 
 // var json = JSON.stringify(ret, null, 2);
 // console.log(json);
@@ -89,7 +90,8 @@ function traverse(path)
 function addCount(node, path)
 {
 	var probs = traverse(path);
-	probs[node.type] = (probs[node.type] || 0) + 1;
+	var type = node.type || node;
+	probs[type] = (probs[type] || 0) + 1;
 	probs[TOTAL] += 1;
 }
 
@@ -108,6 +110,7 @@ function parseBE(node, path) //BinaryExpression
 	//store operator, lhs and rhs information
 	parseNode(node.left, path.concat(node.type, BE_LEFT));
 	parseNode(node.right, path.concat(node.type, BE_RIGHT));
+	parseNode(node.operator, path.concat(node.type, BE_OP));
 }
 
 function parseAE(node, path) //AssignmentExpression
