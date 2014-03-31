@@ -112,7 +112,7 @@ function generateNode(model, path)
 
 	//with operators/ME_COMPUTED (true/false), the type is the literal thing
 	var last = path[path.length-1];
-	if (last == BE_OP || last == UPDATE_OP)
+	if (last == BE_OP || last == UPDATE_OP || last == UE_OP)
 		return type;
 
 	if (last == ME_COMPUTED)
