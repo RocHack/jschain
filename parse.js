@@ -296,8 +296,7 @@ function parseNode(node, path)
 {
 	if (!node)
 		node = END_NODE;
-	if (path.length)
-		addCount(node, path);
+	addCount(node, path);
 	// console.log("parsing ", node.type, " path=",path);
 	// look for the node right before the goal line
 	if (node.loc)

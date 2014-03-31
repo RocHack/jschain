@@ -107,7 +107,7 @@ function generateNode(model, path)
 	}
 	if (!type) {
 		//console.log("Unable to pick node type at", path, " map = ", map);
-		throw new Error("Unable to pick node type at", path);
+		throw new Error("Unable to pick node type at [" + path.join(", ") + "]");
 	}
 
 	//with operators/ME_COMPUTED (true/false), the type is the literal thing
