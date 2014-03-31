@@ -389,6 +389,6 @@ var m = {"Program":{"B":{"null":{"_total":6,"VariableDeclaration":2,"IfStatement
 // console.log(JSON.stringify(m, null, 2));
 var syntax = generateProgram(m);
 // console.log(JSON.stringify(syntax, null, 2));
-console.log(escodegen.generate(syntax));
+// console.log(escodegen.generate(syntax));
 
 module.exports.generateProgram = generateProgram;

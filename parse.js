@@ -76,7 +76,7 @@ var ret = parseFile("var hi = {}; h = (a = 3); function foo () { if (a == '5') {
 
 // var json = JSON.stringify(ret, null, 2);
 // console.log(json);
-console.log(JSON.stringify(ret));
+// console.log(JSON.stringify(ret));
 
 
 function traverse(path)
