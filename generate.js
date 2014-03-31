@@ -17,6 +17,11 @@ var WHILE_BODY = "WHILE_BODY";
 var FUNC_BODY = "FUNC_BODY";
 var FUNC_E_BODY = "FUNC_E_BODY";
 
+var TRY_BLOCK = "TRY_BLOCK";
+var TRY_HANDLER = "TRY_HANDLER";
+var TRY_GHANDLER = "TRY_GHANDLER";
+var TRY_FINALIZER = "TRY_FINALIZER";
+
 var EXPR = "EXPR";
 
 var AE_LEFT = "AE_LEFT";
@@ -25,6 +30,9 @@ var AE_RIGHT = "AE_RIGHT";
 var BE_LEFT = "BE_LEFT";
 var BE_RIGHT = "BE_RIGHT";
 var BE_OP = "BE_OP";
+
+var UE_ARG = "UE_ARG";
+var UE_OP = "UE_OP";
 
 var ME_OBJ = "ME_OBJ";
 var ME_PROP = "ME_PROP";
@@ -54,6 +62,7 @@ var generateFunctions = {
 	'ForStatement': generateFor,
 	'WhileStatement': generateWhile,
 	'BinaryExpression': generateBE,
+	'UnaryExpression':generateUnaryE,
 	'LogicalExpression': generateLE,
 	'UpdateExpression': generateUE,
 	'IfStatement': generateIf,
@@ -66,6 +75,8 @@ var generateFunctions = {
 	'ReturnStatement':generateReturn,
 	'MemberExpression':generateME,
 	'ArrayExpression':generateArrayExpression,
+	'TryStatement':generateTryStatement,
+	'CatchClause':generateCatchClause,
 	'_end': generateEnd
 };
 
@@ -241,6 +252,16 @@ function generateBE(model, path)
 	};
 }
 
+function generateUnaryE(model, path)
+{
+	return {
+	    "type": "UnaryExpression",
+	    "operator": generateNode(model, path.concat(UE_OP)),
+	    "argument": generateNode(model, path.concat(UE_ARG)),
+	    "prefix": true
+	};
+}
+
 function generateLE(model, path)
 {
 	return {
@@ -357,6 +378,41 @@ function generateArrayExpression(model, path)
         type: "ArrayExpression",
         elements: exprs
     }
+}
+
+function generateHandlers(model, path)
+{
+	var handlers = [];
+	var handler = generateNode(model, path);
+	while (handler && handler.type != END) {
+		handlers.push(handler);
+		path = path.concat(handler.type, FOLLOW);
+		handler = generateNode(model, path);
+	}
+	return handlers;
+}
+
+function generateTryStatement(model, path)
+{
+	return {
+        type: "TryStatement",
+		block: generateNode(model, path.concat(TRY_BLOCK)),
+		guardedHandlers: generateHandlers(model, path.concat(TRY_GHANDLER)),
+		handlers: generateHandlers(model, path.concat(TRY_HANDLER)),
+		finalizer: generateNode(model, path.concat(TRY_FINALIZER))
+    };
+}
+
+function generateCatchClause(model, path)
+{
+	return {
+		type: "CatchClause",
+		param: {
+			"type": "Identifier",
+			"name": "e"
+		},
+		body: generateNode(model, path.concat(BODY))
+	};
 }
 
 /*

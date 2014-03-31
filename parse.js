@@ -8,6 +8,7 @@ var parseFunctions =
 'IfStatement':parseIf, 
 'BlockStatement':parseBS,
 'BinaryExpression':parseBE,
+'UnaryExpression':parseUnaryE,
 'LogicalExpression':parseLE,
 'AssignmentExpression':parseAE,
 'ForStatement':parseFor,
@@ -16,6 +17,8 @@ var parseFunctions =
 'FunctionExpression':parseFuncExp,
 'ArrayExpression':parseArrayExpression,
 'ExpressionStatement':parseES,
+'TryStatement':parseTryStatement,
+'CatchClause':parseCatchClause,
 'CallExpression':parseCall,
 'ReturnStatement':parseReturn,
 'UpdateExpression':parseUE,
@@ -40,6 +43,11 @@ var WHILE_BODY = "WHILE_BODY";
 var FUNC_BODY = "FUNC_BODY";
 var FUNC_E_BODY = "FUNC_E_BODY";
 
+var TRY_BLOCK = "TRY_BLOCK";
+var TRY_HANDLER = "TRY_HANDLER";
+var TRY_GHANDLER = "TRY_GHANDLER";
+var TRY_FINALIZER = "TRY_FINALIZER";
+
 var EXPR = "EXPR";
 var AE_LEFT = "AE_LEFT";
 var AE_RIGHT = "AE_RIGHT";
@@ -47,6 +55,9 @@ var AE_RIGHT = "AE_RIGHT";
 var BE_LEFT = "BE_LEFT";
 var BE_RIGHT = "BE_RIGHT";
 var BE_OP = "BE_OP";
+
+var UE_ARG = "UE_ARG";
+var UE_OP = "UE_OP";
 
 var ME_OBJ = "ME_OBJ";
 var ME_PROP = "ME_PROP";
@@ -133,6 +144,15 @@ function parseBE(node, path) //BinaryExpression
 	parseNode(node.left, path.concat(node.type, BE_LEFT));
 	parseNode(node.right, path.concat(node.type, BE_RIGHT));
 	parseNode(node.operator, path.concat(node.type, BE_OP));
+}
+
+function parseUnaryE(node, path) //UnaryExpression
+{
+	//store operator, argument
+	//prefix?
+	parseNode(node.left, path.concat(node.type, BE_LEFT));
+	parseNode(node.argument, path.concat(node.type, UE_ARG));
+	parseNode(node.operator, path.concat(node.type, UE_OP));
 }
 
 function parseLE(node, path) //LogicalExpression
@@ -240,6 +260,31 @@ function parseArrayExpression(node, path)
 		path = path.concat([expression.type, FOLLOW]);
 	}
 	parseNode(END_NODE, path);
+}
+
+function parseHandlers(handlers, path)
+{
+	for (var i = 0; i < handlers.length; i++)
+	{
+		var handler = handlers[i];
+		parseNode(handler, path);
+		path = path.concat([handler.type, FOLLOW]);
+	}
+	parseNode(END_NODE, path);
+}
+
+function parseTryStatement(node, path)
+{
+	parseNode(node.block, path.concat(node.type, TRY_BLOCK));
+	parseHandlers(node.guardedHandlers, path.concat(node.type, TRY_GHANDLER));
+	parseHandlers(node.handlers, path.concat(node.type, TRY_HANDLER));
+	parseNode(node.finalizer, path.concat(node.type, TRY_FINALIZER));
+}
+
+function parseCatchClause(node, path)
+{
+	// param
+	parseNode(node.body, path.concat(node.type, BODY));
 }
 
 function parseProgram(program)
