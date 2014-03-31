@@ -20,6 +20,7 @@ var parseFunctions =
 'ArrayExpression':parseArrayExpression,
 'ExpressionStatement':parseES,
 'TryStatement':parseTryStatement,
+'ThrowStatement':parseThrowStatement,
 'CatchClause':parseCatchClause,
 'CallExpression':parseCall,
 'ReturnStatement':parseReturn,
@@ -52,6 +53,8 @@ var TRY_BLOCK = "TRY_BLOCK";
 var TRY_HANDLER = "TRY_HANDLER";
 var TRY_GHANDLER = "TRY_GHANDLER";
 var TRY_FINALIZER = "TRY_FINALIZER";
+
+var THROW_ARG = "THROW_ARG";
 
 var EXPR = "EXPR";
 var AE_LEFT = "AE_LEFT";
@@ -304,6 +307,11 @@ function parseCatchClause(node, path)
 {
 	// param
 	parseNode(node.body, path.concat(node.type, BODY));
+}
+
+function parseThrowStatement(node, path)
+{
+	parseNode(node.argument, path.concat(node.type, THROW_ARG));
 }
 
 function parseProgram(program)

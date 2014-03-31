@@ -25,6 +25,8 @@ var TRY_HANDLER = "TRY_HANDLER";
 var TRY_GHANDLER = "TRY_GHANDLER";
 var TRY_FINALIZER = "TRY_FINALIZER";
 
+var THROW_ARG = "THROW_ARG";
+
 var EXPR = "EXPR";
 
 var AE_LEFT = "AE_LEFT";
@@ -81,6 +83,7 @@ var generateFunctions = {
 	'MemberExpression':generateME,
 	'ArrayExpression':generateArrayExpression,
 	'TryStatement':generateTryStatement,
+	'ThrowStatement':generateThrowStatement,
 	'CatchClause':generateCatchClause,
 	'_end': generateEnd
 };
@@ -439,6 +442,14 @@ function generateCatchClause(model, path)
 		},
 		body: generateNode(model, path.concat(BODY))
 	};
+}
+
+function generateThrowStatement(model, path)
+{
+	return {
+		type: "ThrowStatement",
+		argument: generateNode(model, path.concat(THROW_ARG)),
+    };
 }
 
 /*
