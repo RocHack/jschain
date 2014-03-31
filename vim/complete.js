@@ -5,8 +5,12 @@
 var showErrors = true;
 
 var escodegen = require("../node_modules/escodegen");
-var generateProgram = require("../generate").generateProgram;
-var parseFile = require("../parse").parseFile;
+var esprima = require("../node_modules/esprima");
+var generate = require("../generate");
+var parse = require("../parse");
+
+// the position at which we want to make an insertion
+var lineNum = process.argv[2] || 0;
 
 var lines = [];
 process.stdin.setEncoding('utf8');
@@ -30,24 +34,37 @@ var escodegenOptions = {
 	}
 };
 
+function outputMatch(match) {
+	process.stdout.write("call complete_add(" + JSON.stringify(match) + ")\n");
+}
+
+function outputText(text) {
+	text.toString().split("\n").map(outputMatch);
+}
+
 function processCode() {
 	var source = lines.join("\n");
-	try {
-		var model = parseFile(source);
-	} catch (e) {
-		if (showErrors) {
-			console.log(e.stack);
-		}
-	}
+	var sourceSyntax = esprima.parse(source, {
+		tolerant: true,
+		loc: true
+	});
+	var model = parse.parseSyntax(sourceSyntax, lineNum);
+	var path = parse.getPathForLine();
+	//process.stderr.write("[" + path.join(", ") + "]\n");
 	for (var i = 0; i < options; i++) {
 		try {
-			var syntax = generateProgram(model);
-			var code = escodegen.generate(syntax, escodegenOptions);
-			process.stdout.write(code);
-			process.stdout.write("\n");
+			var node = generate.generateNode(model, path);
+			if (node) {
+				var code = escodegen.generate(node, escodegenOptions);
+				outputMatch({
+					word: code,
+					//menu: JSON.stringify(node, null, 0)
+					menu: node.type
+				});
+			}
 		} catch (e) {
 			if (showErrors) {
-				console.log(e.stack);
+				outputText(e.stack);
 			}
 		}
 	}

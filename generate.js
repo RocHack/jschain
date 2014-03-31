@@ -17,6 +17,11 @@ var WHILE_BODY = "WHILE_BODY";
 var FUNC_BODY = "FUNC_BODY";
 var FUNC_E_BODY = "FUNC_E_BODY";
 
+var TRY_BLOCK = "TRY_BLOCK";
+var TRY_HANDLER = "TRY_HANDLER";
+var TRY_GHANDLER = "TRY_GHANDLER";
+var TRY_FINALIZER = "TRY_FINALIZER";
+
 var EXPR = "EXPR";
 
 var AE_LEFT = "AE_LEFT";
@@ -25,6 +30,9 @@ var AE_RIGHT = "AE_RIGHT";
 var BE_LEFT = "BE_LEFT";
 var BE_RIGHT = "BE_RIGHT";
 var BE_OP = "BE_OP";
+
+var UE_ARG = "UE_ARG";
+var UE_OP = "UE_OP";
 
 var ME_OBJ = "ME_OBJ";
 var ME_PROP = "ME_PROP";
@@ -49,11 +57,13 @@ var generateFunctions = {
 	'FunctionDeclaration': generateFD,
 	'FunctionExpression': generateFE,
 	'VariableDeclaration': generateVDeclaration,
-	'EmptyExpression': generateEE,
+	'EmptyStatement': generateEmptyStatement,
 	'BlockStatement': generateBS,
 	'ForStatement': generateFor,
 	'WhileStatement': generateWhile,
 	'BinaryExpression': generateBE,
+	'UnaryExpression':generateUnaryE,
+	'LogicalExpression': generateLE,
 	'UpdateExpression': generateUE,
 	'IfStatement': generateIf,
 	'AssignmentExpression': generateAE,
@@ -64,6 +74,9 @@ var generateFunctions = {
 	'ObjectExpression':generateOE,
 	'ReturnStatement':generateReturn,
 	'MemberExpression':generateME,
+	'ArrayExpression':generateArrayExpression,
+	'TryStatement':generateTryStatement,
+	'CatchClause':generateCatchClause,
 	'_end': generateEnd
 };
 
@@ -99,7 +112,7 @@ function generateNode(model, path)
 
 	//with operators/ME_COMPUTED (true/false), the type is the literal thing
 	var last = path[path.length-1];
-	if (last == BE_OP || last == UPDATE_OP)
+	if (last == BE_OP || last == UPDATE_OP || last == UE_OP)
 		return type;
 
 	if (last == ME_COMPUTED)
@@ -116,9 +129,9 @@ function generateUnknown(type, path)
 	return {type: type, path: path};
 }
 
-function generateEE()
+function generateEmptyStatement()
 {
-	return {type: "EmptyExpression"};
+	return {type: "EmptyStatement"};
 }
 
 function generateWhile(model, path)
@@ -239,6 +252,26 @@ function generateBE(model, path)
 	};
 }
 
+function generateUnaryE(model, path)
+{
+	return {
+	    "type": "UnaryExpression",
+	    "operator": generateNode(model, path.concat(UE_OP)),
+	    "argument": generateNode(model, path.concat(UE_ARG)),
+	    "prefix": true
+	};
+}
+
+function generateLE(model, path)
+{
+	return {
+	    "type": "LogicalExpression",
+	    "operator": generateNode(model, path.concat(BE_OP)),
+	    "left": generateNode(model, path.concat(BE_LEFT)),
+	    "right": generateNode(model, path.concat(BE_RIGHT))
+	};
+}
+
 function generateUE(model, path)
 {
 	return {
@@ -331,6 +364,57 @@ function generateFor(model, path)
     }
 }
 
+function generateArrayExpression(model, path)
+{
+	var sPath = path.concat(BODY);
+	var exprs = [];
+	var expr = generateNode(model, sPath);
+	while (expr && expr.type != END) {
+		exprs.push(expr);
+		sPath = sPath.concat(expr.type, FOLLOW);
+		expr = generateNode(model, sPath);
+	}
+	return {
+        type: "ArrayExpression",
+        elements: exprs
+    }
+}
+
+function generateHandlers(model, path)
+{
+	var handlers = [];
+	var handler = generateNode(model, path);
+	while (handler && handler.type != END) {
+		handlers.push(handler);
+		path = path.concat(handler.type, FOLLOW);
+		handler = generateNode(model, path);
+	}
+	return handlers;
+}
+
+function generateTryStatement(model, path)
+{
+	return {
+        type: "TryStatement",
+		block: generateNode(model, path.concat(TRY_BLOCK)),
+		guardedHandlers: generateHandlers(model, path.concat(TRY_GHANDLER)),
+		handlers: generateHandlers(model, path.concat(TRY_HANDLER)),
+		finalizer: generateNode(model, path.concat(TRY_FINALIZER))
+    };
+}
+
+function generateCatchClause(model, path)
+{
+	return {
+		type: "CatchClause",
+		param: {
+			"type": "Identifier",
+			"name": "e"
+		},
+		body: generateNode(model, path.concat(BODY))
+	};
+}
+
 /*
 var m = {
 	"Program": {
@@ -387,8 +471,9 @@ var m = {
 var m = {"Program":{"B":{"null":{"_total":6,"VariableDeclaration":2,"IfStatement":1,"ForStatement":1,"WhileStatement":1,"FunctionDeclaration":1},"VariableDeclaration":{"VD_INIT":{"_total":2,"CallExpression":1,"ObjectExpression":1},"F":{"_total":2,"VariableDeclaration":1,"ExpressionStatement":1}},"IfStatement":{"IF_T":{"_total":1,"BinaryExpression":1},"IF_C":{"_total":1,"BlockStatement":1},"IF_A":{"_total":1,"ExpressionStatement":1},"F":{"_total":1,"_end":1}},"ForStatement":{"FOR_INIT":{"_total":1,"VariableDeclaration":1},"FOR_TEST":{"_total":1,"BinaryExpression":1},"FOR_UPDATE":{"_total":1,"UpdateExpression":1},"FOR_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}},"WhileStatement":{"WHILE_TEST":{"_total":1,"BinaryExpression":1},"WHILE_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}},"FunctionDeclaration":{"FUNC_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}}}},"VariableDeclaration":{"VD_INIT":{"CallExpression":{"CALL_CALLEE":{"_total":2,"MemberExpression":2}},"FunctionExpression":{"FUNC_E_BODY":{"_total":1,"BlockStatement":1}}},"F":{"VariableDeclaration":{"VD_INIT":{"_total":4,"CallExpression":1,"Literal":3},"F":{"_total":4,"VariableDeclaration":3,"_end":1}},"IfStatement":{"IF_T":{"_total":3,"BinaryExpression":3},"IF_C":{"_total":3,"BlockStatement":3},"IF_A":{"_total":3,"_end":3},"F":{"_total":3,"_end":2,"ExpressionStatement":1}},"ExpressionStatement":{"EXPR":{"_total":1,"AssignmentExpression":1},"F":{"_total":1,"FunctionDeclaration":1}}}},"CallExpression":{"CALL_CALLEE":{"MemberExpression":{"ME_OBJ":{"_total":2,"Identifier":2},"ME_PROP":{"_total":2,"Identifier":2},"ME_COMPUTED":{"_total":2,"false":2}}}},"IfStatement":{"IF_T":{"BinaryExpression":{"BE_LEFT":{"_total":6,"Identifier":6},"BE_RIGHT":{"_total":6,"Literal":6},"BE_OP":{"_total":6,"==":5,">":1}}},"IF_C":{"BlockStatement":{"B":{"_total":6,"VariableDeclaration":1,"ExpressionStatement":5}}},"IF_A":{"ExpressionStatement":{"EXPR":{"_total":1,"AssignmentExpression":1}},"BlockStatement":{"B":{"_total":1,"ExpressionStatement":1}}},"F":{"ExpressionStatement":{"EXPR":{"_total":1,"UpdateExpression":1},"F":{"_total":1,"_end":1}},"ReturnStatement":{"RET_ARG":{"_total":1,"Identifier":1},"F":{"_total":1,"_end":1}}}},"BlockStatement":{"B":{"VariableDeclaration":{"VD_INIT":{"_total":4,"Literal":2,"Identifier":1,"FunctionExpression":1},"F":{"_total":4,"_end":1,"IfStatement":3}},"ExpressionStatement":{"EXPR":{"_total":7,"AssignmentExpression":6,"CallExpression":1},"F":{"_total":7,"_end":7}},"ReturnStatement":{"RET_ARG":{"_total":1,"Literal":1},"F":{"_total":1,"_end":1}},"IfStatement":{"IF_T":{"_total":1,"BinaryExpression":1},"IF_C":{"_total":1,"BlockStatement":1},"IF_A":{"_total":1,"BlockStatement":1},"F":{"_total":1,"ReturnStatement":1}},"ForStatement":{"FOR_INIT":{"_total":1,"VariableDeclaration":1},"FOR_TEST":{"_total":1,"BinaryExpression":1},"FOR_UPDATE":{"_total":1,"UpdateExpression":1},"FOR_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"_end":1}}}},"ExpressionStatement":{"EXPR":{"AssignmentExpression":{"AE_LEFT":{"_total":9,"Identifier":9},"AE_RIGHT":{"_total":9,"Literal":7,"AssignmentExpression":1,"CallExpression":1}},"UpdateExpression":{"UPDATE_OP":{"_total":1,"--":1},"UPDATE_ARG":{"_total":1,"Identifier":1}},"CallExpression":{"CALL_CALLEE":{"_total":1,"Identifier":1}}},"F":{"FunctionDeclaration":{"FUNC_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"FunctionDeclaration":1}},"IfStatement":{"IF_T":{"_total":1,"BinaryExpression":1},"IF_C":{"_total":1,"BlockStatement":1},"IF_A":{"_total":1,"_end":1},"F":{"_total":1,"_end":1}}}},"ForStatement":{"FOR_INIT":{"VariableDeclaration":{"VD_INIT":{"_total":2,"Literal":1,"Identifier":1}}},"FOR_TEST":{"BinaryExpression":{"BE_LEFT":{"_total":2,"Identifier":2},"BE_RIGHT":{"_total":2,"Literal":2},"BE_OP":{"_total":2,"<":1,">":1}}},"FOR_UPDATE":{"UpdateExpression":{"UPDATE_OP":{"_total":2,"++":1,"--":1},"UPDATE_ARG":{"_total":2,"Identifier":2}}},"FOR_BODY":{"BlockStatement":{"B":{"_total":2,"VariableDeclaration":1,"ExpressionStatement":1}}}},"WhileStatement":{"WHILE_TEST":{"BinaryExpression":{"BE_LEFT":{"_total":1,"Identifier":1},"BE_RIGHT":{"_total":1,"Literal":1},"BE_OP":{"_total":1,">":1}}},"WHILE_BODY":{"BlockStatement":{"B":{"_total":1,"VariableDeclaration":1}}}},"FunctionDeclaration":{"FUNC_BODY":{"BlockStatement":{"B":{"_total":3,"VariableDeclaration":1,"IfStatement":1,"ForStatement":1}}},"F":{"FunctionDeclaration":{"FUNC_BODY":{"_total":1,"BlockStatement":1},"F":{"_total":1,"ExpressionStatement":1}},"ExpressionStatement":{"EXPR":{"_total":1,"AssignmentExpression":1},"F":{"_total":1,"IfStatement":1}}}},"FunctionExpression":{"FUNC_E_BODY":{"BlockStatement":{"B":{"_total":1,"ReturnStatement":1}}}},"AssignmentExpression":{"AE_RIGHT":{"AssignmentExpression":{"AE_LEFT":{"_total":1,"Identifier":1},"AE_RIGHT":{"_total":1,"Literal":1}},"CallExpression":{"CALL_CALLEE":{"_total":1,"Identifier":1}}}}};
 
 // console.log(JSON.stringify(m, null, 2));
-var syntax = generateProgram(m);
+// var syntax = generateProgram(m);
 // console.log(JSON.stringify(syntax, null, 2));
 // console.log(escodegen.generate(syntax));
 
 module.exports.generateProgram = generateProgram;
+module.exports.generateNode = generateNode;

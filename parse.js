@@ -8,12 +8,17 @@ var parseFunctions =
 'IfStatement':parseIf, 
 'BlockStatement':parseBS,
 'BinaryExpression':parseBE,
+'UnaryExpression':parseUnaryE,
+'LogicalExpression':parseLE,
 'AssignmentExpression':parseAE,
 'ForStatement':parseFor,
 'WhileStatement':parseWhile,
 'FunctionDeclaration':parseFunc,
 'FunctionExpression':parseFuncExp,
+'ArrayExpression':parseArrayExpression,
 'ExpressionStatement':parseES,
+'TryStatement':parseTryStatement,
+'CatchClause':parseCatchClause,
 'CallExpression':parseCall,
 'ReturnStatement':parseReturn,
 'UpdateExpression':parseUE,
@@ -38,6 +43,11 @@ var WHILE_BODY = "WHILE_BODY";
 var FUNC_BODY = "FUNC_BODY";
 var FUNC_E_BODY = "FUNC_E_BODY";
 
+var TRY_BLOCK = "TRY_BLOCK";
+var TRY_HANDLER = "TRY_HANDLER";
+var TRY_GHANDLER = "TRY_GHANDLER";
+var TRY_FINALIZER = "TRY_FINALIZER";
+
 var EXPR = "EXPR";
 var AE_LEFT = "AE_LEFT";
 var AE_RIGHT = "AE_RIGHT";
@@ -45,6 +55,9 @@ var AE_RIGHT = "AE_RIGHT";
 var BE_LEFT = "BE_LEFT";
 var BE_RIGHT = "BE_RIGHT";
 var BE_OP = "BE_OP";
+
+var UE_ARG = "UE_ARG";
+var UE_OP = "UE_OP";
 
 var ME_OBJ = "ME_OBJ";
 var ME_PROP = "ME_PROP";
@@ -67,7 +80,13 @@ var TOTAL = "_total";
 var DEPTH, DEFAULT_DEPTH = 2;
 
 
+var goalLineNum;
+var currentLineNum;
+var pathAtLine = ['Program', BODY];
+
+/*
 var ret = parseFile('var answer = x.b(); var a = x.foo(); var b = 20; var c = 1; var d = 2;');
+
 var ret = parseFile("if (a=='5') { var a = 10; } else b = 3;");
 var ret = parseFile("for (var i = 0; i < 5; i++) { var a = x; if (a == '5') { b = 5; } }");
 var ret = parseFile("while (i > 0) { var a = 4; if (a > 5) { b = 5; } i--; }");
@@ -76,8 +95,8 @@ var ret = parseFile("var hi = {}; h = (a = 3); function foo () { if (a == '5') {
 
 // var json = JSON.stringify(ret, null, 2);
 // console.log(json);
-// console.log(JSON.stringify(ret));
-
+console.log(JSON.stringify(ret));
+*/
 
 function traverse(path)
 {
@@ -120,6 +139,23 @@ function parseVD(node, path) //VariableDeclaration
 }
 
 function parseBE(node, path) //BinaryExpression
+{
+	//store operator, lhs and rhs information
+	parseNode(node.left, path.concat(node.type, BE_LEFT));
+	parseNode(node.right, path.concat(node.type, BE_RIGHT));
+	parseNode(node.operator, path.concat(node.type, BE_OP));
+}
+
+function parseUnaryE(node, path) //UnaryExpression
+{
+	//store operator, argument
+	//prefix?
+	parseNode(node.left, path.concat(node.type, BE_LEFT));
+	parseNode(node.argument, path.concat(node.type, UE_ARG));
+	parseNode(node.operator, path.concat(node.type, UE_OP));
+}
+
+function parseLE(node, path) //LogicalExpression
 {
 	//store operator, lhs and rhs information
 	parseNode(node.left, path.concat(node.type, BE_LEFT));
@@ -213,6 +249,44 @@ function parseFuncExp(node, path)
 	parseNode(node.body, path.concat([node.type, FUNC_E_BODY]));
 }
 
+function parseArrayExpression(node, path)
+{
+	var expressions = node.elements || [];
+	path = path.concat([node.type, BODY]);
+	for (var i = 0; i < expressions.length; i++)
+	{
+		var expression = expressions[i];
+		parseNode(expression, path);
+		path = path.concat([expression.type, FOLLOW]);
+	}
+	parseNode(END_NODE, path);
+}
+
+function parseHandlers(handlers, path)
+{
+	for (var i = 0; i < handlers.length; i++)
+	{
+		var handler = handlers[i];
+		parseNode(handler, path);
+		path = path.concat([handler.type, FOLLOW]);
+	}
+	parseNode(END_NODE, path);
+}
+
+function parseTryStatement(node, path)
+{
+	parseNode(node.block, path.concat(node.type, TRY_BLOCK));
+	parseHandlers(node.guardedHandlers, path.concat(node.type, TRY_GHANDLER));
+	parseHandlers(node.handlers, path.concat(node.type, TRY_HANDLER));
+	parseNode(node.finalizer, path.concat(node.type, TRY_FINALIZER));
+}
+
+function parseCatchClause(node, path)
+{
+	// param
+	parseNode(node.body, path.concat(node.type, BODY));
+}
+
 function parseProgram(program)
 {
 	parseBlock(program, []);
@@ -220,12 +294,25 @@ function parseProgram(program)
 
 function parseNode(node, path)
 {
-	if (path)
+	if (!node)
+		node = END_NODE;
+	if (path.length)
 		addCount(node, path);
 	// console.log("parsing ", node.type, " path=",path);
+	// look for the node right before the goal line
+	if (node.loc)
+	{
+		var startLineNum = node.loc.start.line;
+		if (startLineNum < goalLineNum && startLineNum > currentLineNum)
+		{
+			currentLineNum = startLineNum;
+			pathAtLine = path;
+			//console.log(startLineNum, node);
+		}
+	}
 	if (parseFunctions[node.type])
 	{
-		parseFunctions[node.type](node, path);
+		parseFunctions[node.type](node, path.slice(-DEPTH*2));
 	}
 }
 
@@ -235,14 +322,33 @@ function parseFile(text, d)
 
 	DEPTH = d || DEFAULT_DEPTH;
 	var syntax = esprima.parse(text, {tolerant: true});
-	parseNode(syntax);
+	parseNode(syntax, []);
+	return hash;
+}
+
+function parseSyntax(syntax, lineNum)
+{
+	reset();
+	goalLineNum = lineNum;
+
+	DEPTH = DEFAULT_DEPTH;
+	parseNode(syntax, []);
 	return hash;
 }
 
 function reset()
 {
 	hash = {};
+	pathAtLine = ['Program', BODY];
+	currentLineNum = 0;
+}
+
+function getPathForLine()
+{
+	return pathAtLine;
 }
 
 module.exports.parseFile = parseFile;
+module.exports.parseSyntax = parseSyntax;
 module.exports.reset = reset;
+module.exports.getPathForLine = getPathForLine;
