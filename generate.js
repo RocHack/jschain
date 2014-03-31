@@ -39,6 +39,10 @@ var BE_OP = "BE_OP";
 var UE_ARG = "UE_ARG";
 var UE_OP = "UE_OP";
 
+var ID_NAME = "ID_NAME";
+
+var L_VAL = "L_VAL";
+
 var ME_OBJ = "ME_OBJ";
 var ME_PROP = "ME_PROP";
 var ME_COMPUTED = "ME_COMPUTED";
@@ -98,8 +102,8 @@ function generateNode(model, path)
 	for (var i = 0; i < path.length; i++) {
 		map = map[path[i]];
 	}
-	while (map.null) {
-		map = map.null;
+	while (map._null) {
+		map = map._null;
 	}
 	var total = map._total || 0;
 	var pick = Math.random() * total;
@@ -120,7 +124,8 @@ function generateNode(model, path)
 
 	//with operators/ME_COMPUTED (true/false), the type is the literal thing
 	var last = path[path.length-1];
-	if (last == BE_OP || last == UPDATE_OP || last == UE_OP)
+	if (last == BE_OP || last == UPDATE_OP || last == UE_OP ||
+		last == ID_NAME || last == L_VAL)
 		return type;
 
 	if (last == ME_COMPUTED)
@@ -189,7 +194,7 @@ function generateID(model, path)
 {
 	return {
         "type": "Identifier",
-        "name": "ID"
+        "name": generateNode(model, path.concat(ID_NAME))
     };
 }
 
@@ -197,8 +202,8 @@ function generateLiteral(model, path)
 {
 	return {
         "type": "Literal",
-        "value": 0,
-        "raw": "0"
+        "value": generateNode(model, path.concat(L_VAL)),
+		"raw": "0"
     };
 }
 

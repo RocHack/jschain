@@ -23,6 +23,8 @@ var parseFunctions =
 'ThrowStatement':parseThrowStatement,
 'CatchClause':parseCatchClause,
 'CallExpression':parseCall,
+'Identifier':parseID,
+'Literal':parseLiteral,
 'ReturnStatement':parseReturn,
 'UpdateExpression':parseUE,
 'MemberExpression':parseME};
@@ -66,6 +68,10 @@ var BE_OP = "BE_OP";
 
 var UE_ARG = "UE_ARG";
 var UE_OP = "UE_OP";
+
+var ID_NAME = "ID_NAME";
+
+var L_VAL = "L_VAL";
 
 var ME_OBJ = "ME_OBJ";
 var ME_PROP = "ME_PROP";
@@ -121,7 +127,7 @@ function traverse(path)
 	//if the path wasn't long enough, have to append nulls to make it the required depth
 	var extras = DEPTH*2 - path.length;
 	for (; extras > 0; extras -= 2) //-=2 because we're subtracting from DEPTH*2, ie, 'program' & 'F'...
-		working = working[null] || (working[null] = {});
+		working = working._null || (working._null = {});
 
 	working[TOTAL] = working[TOTAL] || 0;
 
@@ -132,6 +138,7 @@ function addCount(node, path)
 {
 	var probs = traverse(path);
 	var type = node.type || node;
+	if (type == "_null") return;
 	probs[type] = (probs[type] || 0) + 1;
 	probs[TOTAL] += 1;
 }
@@ -186,6 +193,16 @@ function parseES(node, path) //ExpressionStatement
 function parseCall(node, path)
 {
 	parseNode(node.callee, path.concat(node.type, CALL_CALLEE));
+}
+
+function parseID(node, path)
+{
+	parseNode(node.name, path.concat(node.type, ID_NAME));
+}
+
+function parseLiteral(node, path)
+{
+	parseNode(node.value, path.concat(node.type, L_VAL));
 }
 
 function parseReturn(node, path)
