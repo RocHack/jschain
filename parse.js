@@ -12,9 +12,11 @@ var parseFunctions =
 'LogicalExpression':parseLE,
 'AssignmentExpression':parseAE,
 'ForStatement':parseFor,
+'ForInStatement':parseForIn,
 'WhileStatement':parseWhile,
 'FunctionDeclaration':parseFunc,
 'FunctionExpression':parseFuncExp,
+'ConditionalExpression':parseCE,
 'ArrayExpression':parseArrayExpression,
 'ExpressionStatement':parseES,
 'TryStatement':parseTryStatement,
@@ -36,6 +38,9 @@ var FOR_INIT = "FOR_INIT";
 var FOR_UPDATE = "FOR_UPDATE";
 var FOR_TEST = "FOR_TEST";
 var FOR_BODY = "FOR_BODY";
+
+var FOR_LEFT = "FOR_LEFT";
+var FOR_RIGHT = "FOR_RIGHT";
 
 var WHILE_TEST = "WHILE_TEST";
 var WHILE_BODY = "WHILE_BODY";
@@ -226,6 +231,13 @@ function parseFor(node, path)
 	parseNode(node.body, path.concat([node.type, FOR_BODY]));
 }
 
+function parseForIn(node, path)
+{
+	parseNode(node.left, path.concat([node.type, FOR_LEFT]));
+	parseNode(node.right, path.concat([node.type, FOR_RIGHT]));
+	parseNode(node.body, path.concat([node.type, FOR_BODY]));
+}
+
 function parseWhile(node, path)
 {
 	parseNode(node.test, path.concat([node.type, WHILE_TEST]));
@@ -247,6 +259,13 @@ function parseFuncExp(node, path)
 {
 	//params?
 	parseNode(node.body, path.concat([node.type, FUNC_E_BODY]));
+}
+
+function parseCE(node, path)
+{
+	parseNode(node.test, path.concat([node.type, IF_TEST]));
+	parseNode(node.consequent, path.concat([node.type, IF_CONS]));
+	parseNode(node.alternate, path.concat([node.type, IF_ALT]));
 }
 
 function parseArrayExpression(node, path)

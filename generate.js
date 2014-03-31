@@ -11,6 +11,9 @@ var FOR_UPDATE = "FOR_UPDATE";
 var FOR_TEST = "FOR_TEST";
 var FOR_BODY = "FOR_BODY";
 
+var FOR_LEFT = "FOR_LEFT";
+var FOR_RIGHT = "FOR_RIGHT";
+
 var WHILE_TEST = "WHILE_TEST";
 var WHILE_BODY = "WHILE_BODY";
 
@@ -60,12 +63,14 @@ var generateFunctions = {
 	'EmptyStatement': generateEmptyStatement,
 	'BlockStatement': generateBS,
 	'ForStatement': generateFor,
+	'ForInStatement': generateForIn,
 	'WhileStatement': generateWhile,
 	'BinaryExpression': generateBE,
 	'UnaryExpression':generateUnaryE,
 	'LogicalExpression': generateLE,
 	'UpdateExpression': generateUE,
 	'IfStatement': generateIf,
+	'ConditionalExpression': generateCE,
 	'AssignmentExpression': generateAE,
 	'ExpressionStatement': generateES,
 	'CallExpression':generateCall,
@@ -242,6 +247,16 @@ function generateIf(model, path)
     };
 }
 
+function generateCE(model, path)
+{
+	return {
+        "type": "ConditionalExpression",
+        "test": generateNode(model, path.concat(IF_TEST)),
+        "consequent": generateNode(model, path.concat(IF_CONS)),
+        "alternate": generateNode(model, path.concat(IF_ALT))
+    };
+}
+
 function generateBE(model, path)
 {
 	return {
@@ -362,6 +377,17 @@ function generateFor(model, path)
         update: generateNode(model, path.concat(FOR_UPDATE)),
         body: generateNode(model, path.concat(FOR_BODY))
     }
+}
+
+function generateForIn(model, path)
+{
+	return {
+        type: "ForInStatement",
+        left: generateNode(model, path.concat(FOR_LEFT)),
+        right: generateNode(model, path.concat(FOR_RIGHT)),
+        body: generateNode(model, path.concat(FOR_BODY)),
+        each: false
+    };
 }
 
 function generateArrayExpression(model, path)
