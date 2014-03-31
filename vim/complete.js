@@ -35,7 +35,7 @@ var escodegenOptions = {
 };
 
 function outputMatch(match) {
-	process.stdout.write("call add(matches, " + JSON.stringify(match) + ")\n");
+	process.stdout.write("call complete_add(" + JSON.stringify(match) + ")\n");
 }
 
 function outputText(text) {
@@ -69,7 +69,6 @@ function processCode() {
 		}
 	}
 }
-
 
 process.stdin.on('end', processCode);
 
