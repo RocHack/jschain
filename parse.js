@@ -142,7 +142,8 @@ function addCount(node, path)
 {
 	var probs = traverse(path);
 	var type = node.type || node;
-	if (type == "_null") return;
+	// todo: don't rely on sentinels for this
+	if (type == "_null" || type == TOTAL) return;
 	probs[type] = (probs[type] || 0) + 1;
 	probs[TOTAL] += 1;
 }
