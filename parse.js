@@ -11,6 +11,7 @@ var parseFunctions =
 'UnaryExpression':parseUnaryE,
 'LogicalExpression':parseLE,
 'AssignmentExpression':parseAE,
+'NewExpression':parseNew,
 'ForStatement':parseFor,
 'ForInStatement':parseForIn,
 'WhileStatement':parseWhile,
@@ -87,6 +88,9 @@ var UPDATE_ARG = "UPDATE_ARG";
 var UPDATE_OP = "UPDATE_OP";
 
 var END_NODE = {type:"_end"};
+
+var NEW_CALLEE = "NEW_CALLEE";
+var NEW_ARGS = "NEW_ARGS";
 
 var TOTAL = "_total";
 
@@ -185,6 +189,12 @@ function parseAE(node, path) //AssignmentExpression
 	parseNode(node.right, path.concat(node.type, AE_RIGHT));
 }
 
+function parseNew(node, path) //NewExpression
+{
+	parseNode(node.callee, path.concat(node.type, NEW_CALLEE));
+	parseBlock(node.arguments, path.concat(node.type, NEW_ARGS));
+}
+
 function parseES(node, path) //ExpressionStatement
 {
 	parseNode(node.expression, path.concat(node.type, EXPR));
@@ -230,15 +240,13 @@ function parseIf(node, path)
 	parseNode(node.alternate || END_NODE, path.concat([node.type, IF_ALT]));
 }
 
-function parseBlock(node, path)
+function parseBlock(nodes, path)
 {
-	path = path.concat([node.type, BODY]);
-	var statements = node.body;
-	for (var i = 0; i < statements.length; i++)
+	for (var i = 0; i < nodes.length; i++)
 	{
-		var statement = statements[i];
-		parseNode(statement, path);
-		path = path.concat([statement.type, FOLLOW]);
+		var node = nodes[i];
+		parseNode(node, path);
+		path = path.concat([node.type, FOLLOW]);
 	}
 	parseNode(END_NODE, path);
 }
@@ -266,7 +274,7 @@ function parseWhile(node, path)
 
 function parseBS(node, path)
 {
-	parseBlock(node, path);
+	parseBlock(node.body, path.concat(node.type, BODY));
 }
 
 function parseFunc(node, path)
@@ -333,7 +341,7 @@ function parseThrowStatement(node, path)
 
 function parseProgram(program)
 {
-	parseBlock(program, []);
+	parseBlock(program.body, [program.type, BODY]);
 }
 
 function parseNode(node, path)

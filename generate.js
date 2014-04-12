@@ -56,6 +56,9 @@ var UPDATE_OP = "UPDATE_OP";
 
 var VD_INIT = "VD_INIT";
 
+var NEW_CALLEE = "NEW_CALLEE";
+var NEW_ARGS = "NEW_ARGS";
+
 var END = "_end";
 
 var DEPTH = 2;
@@ -75,6 +78,7 @@ var generateFunctions = {
 	'UnaryExpression':generateUnaryE,
 	'LogicalExpression': generateLE,
 	'UpdateExpression': generateUE,
+	'NewExpression': generateNew,
 	'IfStatement': generateIf,
 	'ConditionalExpression': generateCE,
 	'AssignmentExpression': generateAE,
@@ -233,16 +237,15 @@ function generateAE(model, path)
 
 function generateBlock(model, path)
 {
-	var sPath = path.concat(BODY);
-	var statements = [];
-	var statement = generateNode(model, sPath);
-	while (statement && statement.type != END) {
-		//console.log("generateBlock", path, statement);
-		statements.push(statement);
-		sPath = sPath.concat(statement.type, FOLLOW);
-		statement = generateNode(model, sPath);
+	var nodes = [];
+	var node = generateNode(model, path);
+	while (node && node.type != END) {
+		//console.log("generateBlock", path, node);
+		nodes.push(node);
+		path = path.concat(node.type, FOLLOW);
+		node = generateNode(model, path);
 	}
-	return statements;
+	return nodes;
 }
 
 function generateIf(model, path)
@@ -304,12 +307,21 @@ function generateUE(model, path)
     };
 }
 
+function generateNew(model, path)
+{
+	return {
+        "type": "NewExpression",
+        "callee": generateNode(model, path.concat(NEW_CALLEE)),
+        "arguments": generateBlock(model, path.concat(NEW_ARGS))
+    };
+}
+
 function generateProgram(model)
 {
 	var path = ["Program"];
 	return {
 		type: "Program",
-		body: generateBlock(model, path)
+		body: generateBlock(model, path.concat(BODY))
 	};
 }
 
@@ -372,7 +384,7 @@ function generateBS(model, path)
 {
 	return {
 		type: "BlockStatement",
-		body: generateBlock(model, path)
+		body: generateBlock(model, path.concat(BODY))
 	};
 }
 
