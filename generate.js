@@ -45,6 +45,7 @@ var L_VAL = "L_VAL";
 
 var ME_OBJ = "ME_OBJ";
 var ME_PROP = "ME_PROP";
+var ME_PROP_ID = "ME_PROP_ID";
 var ME_COMPUTED = "ME_COMPUTED";
 
 var CALL_CALLEE = "CALL_CALLEE";
@@ -179,11 +180,13 @@ function generateReturn(model, path)
 
 function generateME(model, path)
 {
+	var computed = generateNode(model, path.concat(ME_COMPUTED));
+	var meProp = computed ? ME_PROP : ME_PROP_ID;
 	return {
         "type": "MemberExpression",
-        "computed": generateNode(model, path.concat(ME_COMPUTED)),
+        "computed": computed,
         "object": generateNode(model, path.concat(ME_OBJ)),
-        "property": generateNode(model, path.concat(ME_PROP))
+        "property": generateNode(model, path.concat(meProp))
     };
 }
 

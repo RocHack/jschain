@@ -75,6 +75,7 @@ var L_VAL = "L_VAL";
 
 var ME_OBJ = "ME_OBJ";
 var ME_PROP = "ME_PROP";
+var ME_PROP_ID = "ME_PROP_ID";
 var ME_COMPUTED = "ME_COMPUTED";
 
 var CALL_CALLEE = "CALL_CALLEE";
@@ -228,8 +229,9 @@ function parseUE(node, path)
 
 function parseME(node, path)
 {
+	var meProp = node.computed ? ME_PROP : ME_PROP_ID;
 	parseNode(node.object, path.concat(node.type, ME_OBJ));
-	parseNode(node.property, path.concat(node.type, ME_PROP));
+	parseNode(node.property, path.concat(node.type, meProp));
 	parseNode(node.computed, path.concat(node.type, ME_COMPUTED));
 }
 
