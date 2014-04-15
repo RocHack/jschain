@@ -168,7 +168,7 @@ function parseEnd(end, path)
 
 function parseVD(node, path) //VariableDeclaration
 {
-	parseList(node, path, node.declarations);
+	parseList(node.declarations, path.concat(node.type, LIST));
 }
 
 function parseVDeclarator(node, path)
@@ -212,12 +212,12 @@ function parseAE(node, path) //AssignmentExpression
 function parseNew(node, path) //NewExpression
 {
 	parseNode(node.callee, path.concat(node.type, NEW_CALLEE));
-	parseBlock(node.arguments, path.concat(node.type, NEW_ARGS));
+	parseList(node.arguments, path.concat(node.type, NEW_ARGS));
 }
 
 function parseCall(node, path)
 {
-	parseList(node, path, node.arguments);
+	parseList(node.arguments, path.concat(node.type, LIST));
 	parseNode(node.callee, path.concat(node.type, CALL_CALLEE));
 }
 
@@ -257,8 +257,9 @@ function parseIf(node, path)
 	parseNode(node.alternate || END_NODE, path.concat([node.type, IF_ALT]));
 }
 
-function parseBlock(nodes, path)
+function parseList(nodes, path)
 {
+	nodes = nodes || [];
 	for (var i = 0; i < nodes.length; i++)
 	{
 		var node = nodes[i];
@@ -291,32 +292,19 @@ function parseWhile(node, path)
 
 function parseBS(node, path)
 {
-	parseBlock(node.body, path.concat(node.type, BODY));
-}
-
-function parseList(node, path, list)
-{
-	list = list || [];
-	path = path.concat([node.type, LIST]);
-	for (var i = 0; i < list.length; i++)
-	{
-		var elem = list[i];
-		parseNode(elem, path);
-		path = path.concat([elem.type, FOLLOW]);
-	}
-	parseNode(END_NODE, path);
+	parseList(node.body, path.concat(node.type, BODY));
 }
 
 function parseFunc(node, path)
 {
-	parseList(node, path, node.params);
+	parseList(node.params, path.concat(node.type, LIST));
 	parseNode(node.id, path.concat([node.type, FUNC_ID]));
 	parseNode(node.body, path.concat([node.type, FUNC_BODY]));
 }
 
 function parseFuncExp(node, path)
 {
-	parseList(node, path, node.params);
+	parseList(node.params, path.concat(node.type, LIST));
 	parseNode(node.body, path.concat([node.type, FUNC_E_BODY]));
 }
 
@@ -329,12 +317,12 @@ function parseCE(node, path)
 
 function parseArrayExpression(node, path)
 {
-	parseList(node, path, node.elements);
+	parseList(node.elements, path.concat(node.type, LIST));
 }
 
 function parseObjectExpression(node, path)
 {
-	parseList(node, path, node.properties);
+	parseList(node.properties, path.concat(node.type, LIST));
 }
 
 function parseProperty(node, path)
@@ -375,7 +363,7 @@ function parseThrowStatement(node, path)
 
 function parseProgram(program)
 {
-	parseBlock(program.body, [program.type, BODY]);
+	parseList(program.body, [program.type, BODY]);
 }
 
 function parseNode(node, path)

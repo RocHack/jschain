@@ -203,7 +203,7 @@ function generateOE(model, path)
 {
 	return {
         "type": "ObjectExpression",
-        "properties": generateList(model, path)
+        "properties": generateList(model, path.concat(LIST))
     };
 }
 
@@ -239,7 +239,7 @@ function generateCall(model, path)
 	return {
         "type": "CallExpression",
         "callee": generateNode(model, path.concat(CALL_CALLEE)),
-        "arguments": generateList(model, path)
+        "arguments": generateList(model, path.concat(LIST))
     };
 }
 
@@ -258,12 +258,11 @@ function generateAE(model, path)
 	};
 }
 
-function generateBlock(model, path)
+function generateList(model, path)
 {
 	var nodes = [];
 	var node = generateNode(model, path);
 	while (node && node.type != END) {
-		//console.log("generateBlock", path, node);
 		nodes.push(node);
 		path = path.concat(node.type, FOLLOW);
 		node = generateNode(model, path);
@@ -335,7 +334,7 @@ function generateNew(model, path)
 	return {
         "type": "NewExpression",
         "callee": generateNode(model, path.concat(NEW_CALLEE)),
-        "arguments": generateBlock(model, path.concat(NEW_ARGS))
+        "arguments": generateList(model, path.concat(NEW_ARGS))
     };
 }
 
@@ -344,7 +343,7 @@ function generateProgram(model)
 	var path = ["Program"];
 	return {
 		type: "Program",
-		body: generateBlock(model, path.concat(BODY))
+		body: generateList(model, path.concat(BODY))
 	};
 }
 
@@ -353,7 +352,7 @@ function generateFD(model, path)
 	return {
 		type: "FunctionDeclaration",
 		id: generateNode(model, path.concat(FUNC_ID)),
-		params: generateList(model, path),
+		params: generateList(model, path.concat(LIST)),
 		defaults: [],
 		body: generateNode(model, path.concat(FUNC_BODY)),
 		rest: null,
@@ -367,7 +366,7 @@ function generateFE(model, path)
 	return {
         "type": "FunctionExpression",
         "id": null,
-        "params": generateList(model, path),
+        "params": generateList(model, path.concat(LIST)),
         "defaults": [],
         "body": generateNode(model, path.concat(FUNC_E_BODY)),
         "rest": null,
@@ -380,7 +379,7 @@ function generateVDeclaration(model, path)
 {
 	return {
 		type: "VariableDeclaration",
-		declarations: generateList(model, path),
+		declarations: generateList(model, path.concat(LIST)),
 		kind: "var"
 	};
 
@@ -399,7 +398,7 @@ function generateBS(model, path)
 {
 	return {
 		type: "BlockStatement",
-		body: generateBlock(model, path.concat(BODY))
+		body: generateList(model, path.concat(BODY))
 	};
 }
 
@@ -425,37 +424,12 @@ function generateForIn(model, path)
     };
 }
 
-function generateList(model, path)
-{
-	var sPath = path.concat(LIST);
-	var elems = [];
-	var elem = generateNode(model, sPath);
-	while (elem && elem.type != END) {
-		elems.push(elem);
-		sPath = sPath.concat(elem.type, FOLLOW);
-		elem = generateNode(model, sPath);
-	}
-	return elems;
-}
-
 function generateArrayExpression(model, path)
 {
 	return {
         type: "ArrayExpression",
-        elements: generateList(model, path)
+        elements: generateList(model, path.concat(LIST))
     }
-}
-
-function generateHandlers(model, path)
-{
-	var handlers = [];
-	var handler = generateNode(model, path);
-	while (handler && handler.type != END) {
-		handlers.push(handler);
-		path = path.concat(handler.type, FOLLOW);
-		handler = generateNode(model, path);
-	}
-	return handlers;
 }
 
 function generateTryStatement(model, path)
@@ -463,8 +437,8 @@ function generateTryStatement(model, path)
 	return {
         type: "TryStatement",
 		block: generateNode(model, path.concat(TRY_BLOCK)),
-		guardedHandlers: generateHandlers(model, path.concat(TRY_GHANDLER)),
-		handlers: generateHandlers(model, path.concat(TRY_HANDLER)),
+		guardedHandlers: generateList(model, path.concat(TRY_GHANDLER)),
+		handlers: generateList(model, path.concat(TRY_HANDLER)),
 		finalizer: generateNode(model, path.concat(TRY_FINALIZER))
     };
 }
