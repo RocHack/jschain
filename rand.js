@@ -23,7 +23,15 @@ fs.readFile("parse.js", 'utf8', function (err,data) {
         }
         else
         {
-            console.log(escodegen.generate(syntax));
+            try
+            {
+                console.log(escodegen.generate(syntax));
+            }
+            catch (e)
+            {
+                console.log(JSON.stringify(syntax, null, 4));
+                console.log(e.stack);
+            }
         }
     }
     catch (e)

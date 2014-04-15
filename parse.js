@@ -18,6 +18,8 @@ var parseFunctions =
 'FunctionExpression':parseFuncExp,
 'ConditionalExpression':parseCE,
 'ArrayExpression':parseArrayExpression,
+'ObjectExpression':parseObjectExpression,
+'Property':parseProperty,
 'TryStatement':parseTryStatement,
 'ThrowStatement':parseThrowStatement,
 'CatchClause':parseCatchClause,
@@ -82,6 +84,9 @@ var CALL_CALLEE = "CALL_CALLEE";
 
 var VD_INIT = "VD_INIT";
 var VD_ID = "VD_ID";
+
+var PROP_KEY = "PROP_KEY";
+var PROP_VAL = "PROP_VAL";
 
 var RET_ARG = "RET_ARG";
 
@@ -320,6 +325,17 @@ function parseCE(node, path)
 function parseArrayExpression(node, path)
 {
 	parseList(node, path, node.elements);
+}
+
+function parseObjectExpression(node, path)
+{
+	parseList(node, path, node.properties);
+}
+
+function parseProperty(node, path)
+{
+	parseNode(node.key, path.concat(node.type, PROP_KEY));
+	parseNode(node.value, path.concat(node.type, PROP_VAL));
 }
 
 function parseHandlers(handlers, path)

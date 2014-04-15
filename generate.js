@@ -59,6 +59,9 @@ var UPDATE_OP = "UPDATE_OP";
 var VD_INIT = "VD_INIT";
 var VD_ID = "VD_ID";
 
+var PROP_KEY = "PROP_KEY";
+var PROP_VAL = "PROP_VAL";
+
 var LIST = "LIST";
 
 var NEW_CALLEE = "NEW_CALLEE";
@@ -91,6 +94,7 @@ var generateFunctions = {
 	'Identifier':generateID,
 	'Literal':generateLiteral,
 	'ObjectExpression':generateOE,
+    'Property':generateProperty,
 	'ReturnStatement':generateReturn,
 	'MemberExpression':generateME,
 	'ArrayExpression':generateArrayExpression,
@@ -198,7 +202,17 @@ function generateOE(model, path)
 {
 	return {
         "type": "ObjectExpression",
-        "properties": []
+        "properties": generateList(model, path)
+    };
+}
+
+function generateProperty(model, path)
+{
+    return {
+        "type": "Property",
+        "key": generateNode(model, path.concat(PROP_KEY)),
+        "value": generateNode(model, path.concat(PROP_VAL)),
+        "kind": "init"
     };
 }
 
