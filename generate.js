@@ -82,7 +82,6 @@ var generateFunctions = {
 	'IfStatement': generateIf,
 	'ConditionalExpression': generateCE,
 	'AssignmentExpression': generateAE,
-	'ExpressionStatement': generateES,
 	'CallExpression':generateCall,
 	'Identifier':generateID,
 	'Literal':generateLiteral,
@@ -114,6 +113,7 @@ function generateNode(model, path)
 	var sum = 0;
 	for (var key in map) {
 		if (key == "_total") continue;
+		if (key == "_expr") continue;
 		var count = map[key];
 		sum += count;
 		if (sum >= pick) {
@@ -136,9 +136,18 @@ function generateNode(model, path)
 		return (type === "true");
 
 	var generate = generateFunctions[type];
-	return generate ?
+	var node = generate ?
 		generate(model, path.concat(type)) :
 		generateUnknown(type, path);
+
+	if (map._expr && key in map._expr) {
+		node = {
+			type: "ExpressionStatement",
+			expression: node
+		};
+	}
+
+	return node;
 }
 
 function generateUnknown(type, path)
@@ -158,14 +167,6 @@ function generateWhile(model, path)
         test: generateNode(model, path.concat(WHILE_TEST)),
         body: generateNode(model, path.concat(WHILE_BODY))
     };
-}
-
-function generateES(model, path)
-{
-	return {
-	    "type": "ExpressionStatement",
-	    "expression": generateNode(model, path.concat(EXPR))
-	};
 }
 
 function generateReturn(model, path)

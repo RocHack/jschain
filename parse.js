@@ -19,7 +19,6 @@ var parseFunctions =
 'FunctionExpression':parseFuncExp,
 'ConditionalExpression':parseCE,
 'ArrayExpression':parseArrayExpression,
-'ExpressionStatement':parseES,
 'TryStatement':parseTryStatement,
 'ThrowStatement':parseThrowStatement,
 'CatchClause':parseCatchClause,
@@ -137,15 +136,20 @@ function traverse(path)
 
 	return working;
 }
-
+	
 function addCount(node, path)
 {
 	var probs = traverse(path);
 	var type = node.type || node;
 	// todo: don't rely on sentinels for this
-	if (type == "_null" || type == TOTAL) return;
+	if (type == "_null" || type == TOTAL || type == "_expr") return;
 	probs[type] = (probs[type] || 0) + 1;
 	probs[TOTAL] += 1;
+	if (node.expr) {
+		// mark that the node is wrapped by an expression
+		var expr = probs['_expr'] || (probs['_expr'] = {});
+		expr[type] = true;
+	}
 }
 
 function parseEnd(end, path)
@@ -194,11 +198,6 @@ function parseNew(node, path) //NewExpression
 {
 	parseNode(node.callee, path.concat(node.type, NEW_CALLEE));
 	parseBlock(node.arguments, path.concat(node.type, NEW_ARGS));
-}
-
-function parseES(node, path) //ExpressionStatement
-{
-	parseNode(node.expression, path.concat(node.type, EXPR));
 }
 
 function parseCall(node, path)
@@ -349,6 +348,11 @@ function parseNode(node, path)
 {
 	if (!node)
 		node = END_NODE;
+	if (node.type == "ExpressionStatement")
+	{
+		node = node.expression;
+		node.expr = true;
+	}
 	addCount(node, path);
 	// console.log("parsing ", node.type, " path=",path);
 	// look for the node right before the goal line
