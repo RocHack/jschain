@@ -25,7 +25,7 @@ var nodeFeatures =
 'NewExpression':['callee','arguments'],
 'CallExpression':['arguments','callee'],
 'Identifier':['name'],
-'Literal':['value'],
+'Literal':['raw'],
 'ReturnStatement':['argument'],
 'UnaryExpression':['operator','argument'],
 'MemberExpression':['computed','object','property'],

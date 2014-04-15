@@ -16,7 +16,7 @@ var nodeFeatures =
 'NewExpression':['callee','arguments'],
 'CallExpression':['arguments','callee'],
 'Identifier':['name'],
-'Literal':['value',['raw','0']],
+'Literal':['raw'],
 'ReturnStatement':['argument'],
 'UnaryExpression':['operator','argument',['prefix',true]],
 'MemberExpression':['computed','object','property'],
@@ -95,7 +95,7 @@ function generateNode(model, path)
     //with operators/ME_COMPUTED (true/false), the type is the literal thing
     var last = path[path.length-1];
     var last2 = path[path.length-2];
-    if (last == 'operator' || (last2 == 'Identifier' && last == 'name') || (last2 == 'Literal' && last == 'value'))
+    if (last == 'operator' || last == 'raw' || (last2 == 'Identifier' && last == 'name') || (last2 == 'Literal' && last == 'value'))
         return type.replace(/__/g, "_");
 
     if (type == "null")
@@ -142,6 +142,12 @@ function generateNode(model, path)
                 node[feature] = generateNode(model, newPath);
             }
         }
+    }
+
+    if (type == "Literal")
+    {
+        //turn raw into a value, needed by escodegen, with eval
+        node["value"] = eval(node.raw);
     }
 
     if (map._expr && key in map._expr) {
