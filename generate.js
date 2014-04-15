@@ -131,7 +131,7 @@ function generateNode(model, path)
 	var last = path[path.length-1];
 	if (last == BE_OP || last == UPDATE_OP || last == UE_OP ||
 		last == ID_NAME || last == L_VAL)
-		return type;
+		return type.replace(/__/g, "_");
 
 	if (last == ME_COMPUTED)
 		return (type === "true");

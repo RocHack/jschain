@@ -1,5 +1,4 @@
 var esprima = require("esprima");
-var fs = require('fs');
 
 var parseFunctions = 
 {'Program':parseProgram, 
@@ -87,7 +86,8 @@ var RET_ARG = "RET_ARG";
 var UPDATE_ARG = "UPDATE_ARG";
 var UPDATE_OP = "UPDATE_OP";
 
-var END_NODE = {type:"_end"};
+var END = "_end";
+var END_NODE = {type: END};
 
 var NEW_CALLEE = "NEW_CALLEE";
 var NEW_ARGS = "NEW_ARGS";
@@ -142,15 +142,15 @@ function addCount(node, path)
 {
 	var probs = traverse(path);
 	var type = node.type || node;
-	// todo: don't rely on sentinels for this
-	if (type == "_null" || type == TOTAL || type == "_expr") return;
-	probs[type] = (probs[type] || 0) + 1;
+	var key = (type == END) ? type : type.toString().replace(/_/g, "__");
+	probs[key] = (Object.prototype.hasOwnProperty.call(probs, key) ? probs[key] : 0) + 1;
 	probs[TOTAL] += 1;
 	if (node.expr) {
 		// mark that the node is wrapped by an expression
 		var expr = probs['_expr'] || (probs['_expr'] = {});
 		expr[type] = true;
 	}
+2
 }
 
 function parseEnd(end, path)
