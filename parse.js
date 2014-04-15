@@ -47,6 +47,7 @@ var FOR_RIGHT = "FOR_RIGHT";
 var WHILE_TEST = "WHILE_TEST";
 var WHILE_BODY = "WHILE_BODY";
 
+var FUNC_ID = "FUNC_ID";
 var FUNC_BODY = "FUNC_BODY";
 var FUNC_E_BODY = "FUNC_E_BODY";
 
@@ -80,6 +81,7 @@ var ME_COMPUTED = "ME_COMPUTED";
 var CALL_CALLEE = "CALL_CALLEE";
 
 var VD_INIT = "VD_INIT";
+var VD_ID = "VD_ID";
 
 var RET_ARG = "RET_ARG";
 
@@ -150,7 +152,6 @@ function addCount(node, path)
 		var expr = probs['_expr'] || (probs['_expr'] = {});
 		expr[type] = true;
 	}
-2
 }
 
 function parseEnd(end, path)
@@ -160,6 +161,7 @@ function parseEnd(end, path)
 function parseVD(node, path) //VariableDeclaration
 {
 	parseNode(node.declarations[0].init, path.concat(node.type, VD_INIT));
+	parseNode(node.declarations[0].id, path.concat(node.type, VD_ID));
 	//store declarations information
 }
 
@@ -282,6 +284,7 @@ function parseBS(node, path)
 function parseFunc(node, path)
 {
 	//params?
+	parseNode(node.id, path.concat([node.type, FUNC_ID]));
 	parseNode(node.body, path.concat([node.type, FUNC_BODY]));
 }
 

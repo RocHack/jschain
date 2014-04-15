@@ -17,6 +17,7 @@ var FOR_RIGHT = "FOR_RIGHT";
 var WHILE_TEST = "WHILE_TEST";
 var WHILE_BODY = "WHILE_BODY";
 
+var FUNC_ID = "FUNC_ID";
 var FUNC_BODY = "FUNC_BODY";
 var FUNC_E_BODY = "FUNC_E_BODY";
 
@@ -56,6 +57,7 @@ var UPDATE_ARG = "UPDATE_ARG";
 var UPDATE_OP = "UPDATE_OP";
 
 var VD_INIT = "VD_INIT";
+var VD_ID = "VD_ID";
 
 var NEW_CALLEE = "NEW_CALLEE";
 var NEW_ARGS = "NEW_ARGS";
@@ -333,10 +335,7 @@ function generateFD(model, path)
 {
 	return {
 		type: "FunctionDeclaration",
-		id: {
-			"type": "Identifier",
-			"name": "ID"
-		},
+		id: generateNode(model, path.concat(FUNC_ID)),
 		params: [],
 		defaults: [],
 		body: generateNode(model, path.concat(FUNC_BODY)),
@@ -376,10 +375,7 @@ function generateVDeclarator(model, path)
 {
 	return {
 		type: "VariableDeclarator",
-		id: {
-			"type": "Identifier",
-			"name": "ID"
-		},
+		id: generateNode(model, path.concat(VD_ID)),
 		init: generateNode(model, path.concat(VD_INIT))
 	};
 }
