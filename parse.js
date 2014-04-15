@@ -331,22 +331,11 @@ function parseProperty(node, path)
 	parseNode(node.value, path.concat(node.type, PROP_VAL));
 }
 
-function parseHandlers(handlers, path)
-{
-	for (var i = 0; i < handlers.length; i++)
-	{
-		var handler = handlers[i];
-		parseNode(handler, path);
-		path = path.concat([handler.type, FOLLOW]);
-	}
-	parseNode(END_NODE, path);
-}
-
 function parseTryStatement(node, path)
 {
 	parseNode(node.block, path.concat(node.type, TRY_BLOCK));
-	parseHandlers(node.guardedHandlers, path.concat(node.type, TRY_GHANDLER));
-	parseHandlers(node.handlers, path.concat(node.type, TRY_HANDLER));
+	parseList(node.guardedHandlers, path.concat(node.type, TRY_GHANDLER));
+	parseList(node.handlers, path.concat(node.type, TRY_HANDLER));
 	parseNode(node.finalizer, path.concat(node.type, TRY_FINALIZER));
 }
 
