@@ -7,7 +7,7 @@ var END_NODE = {type: END};
 
 var TOTAL = "_total";
 
-var DEPTH, DEFAULT_DEPTH = 2;
+var DEPTH = 5, DEFAULT_DEPTH = 5;
 
 var goalLineNum;
 var currentLineNum;
@@ -44,7 +44,9 @@ var nodeFeatures =
 'CatchClause':['body'],
 'ThrowStatement':['argument'],
 'Program':['body'],
-'UpdateExpression':['operator','argument']
+'UpdateExpression':['operator','argument'],
+'ContinueStatement':[],
+'BreakStatement':[]
 };
 
 function traverse(path)
@@ -73,7 +75,7 @@ function addCount(node, path)
 {
 	var probs = traverse(path);
 	var type = node.type || node;
-	var key = (type == END) ? type : type.toString().replace(/_/g, "__");
+	var key = (node.type == END) ? type : type.toString().replace(/_/g, "__");
 	probs[key] = (Object.prototype.hasOwnProperty.call(probs, key) ? probs[key] : 0) + 1;
 	probs[TOTAL] += 1;
 	if (node.expr) {
@@ -102,10 +104,11 @@ function parseNode(node, path)
 		return;
 	}
 
-	if (!node)
+	if (node == null)
 	{
-		node = END_NODE;
+		node = "null";
 	}
+
 	if (node.type == "ExpressionStatement")
 	{
 		node = node.expression;

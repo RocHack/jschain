@@ -3,7 +3,7 @@ var escodegen = require("escodegen");
 var FOLLOW = "F";
 var END = "_end";
 
-var DEPTH = 2;
+var DEPTH = 5;
 
 var nodeFeatures = 
 {
@@ -36,7 +36,9 @@ var nodeFeatures =
 'ThrowStatement':['argument'],
 'Program':['body'],
 'UpdateExpression':['operator','argument'],
-'EmptyStatement': []
+'EmptyStatement': [],
+'ContinueStatement':[],
+'BreakStatement':[]
 };
 
 function generateProgram(model)
@@ -51,7 +53,7 @@ function generateList(model, path)
 {
     var nodes = [];
     var node = generateNode(model, path);
-    while (node && node.type != END) {
+    while (node.type != END) {
         nodes.push(node);
         path = path.concat(node.type, FOLLOW);
         node = generateNode(model, path);
@@ -85,7 +87,7 @@ function generateNode(model, path)
             break;
         }
     }
-    if (!type) {
+    if (type == null) {
         //console.log("Unable to pick node type at", path, " map = ", map);
         throw new Error("Unable to pick node type at [" + path.join(", ") + "]");
     }
@@ -96,18 +98,21 @@ function generateNode(model, path)
     if (last == 'operator' || (last2 == 'Identifier' && last == 'name') || (last2 == 'Literal' && last == 'value'))
         return type.replace(/__/g, "_");
 
+    if (type == "null")
+        return null;
+
     if (last == 'computed')
         return (type === "true");
 
-    if (type == END)
-        return null;
-
     var node = {'type':type};
+
+    if (type == END)
+        return node;
 
     var features = nodeFeatures[type];
     if (!features)
     {
-        throw new Error("No known features for node type "+type);
+        throw new Error("No known features for node type "+type+". path = "+path);
     }
 
     for (var i = 0; i < features.length; i++)
