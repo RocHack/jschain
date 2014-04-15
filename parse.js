@@ -4,6 +4,7 @@ var parseFunctions =
 {'Program':parseProgram, 
 'End':parseEnd, 
 'VariableDeclaration':parseVD, 
+'VariableDeclarator': parseVDeclarator,
 'IfStatement':parseIf, 
 'BlockStatement':parseBS,
 'BinaryExpression':parseBE,
@@ -167,9 +168,13 @@ function parseEnd(end, path)
 
 function parseVD(node, path) //VariableDeclaration
 {
-	parseNode(node.declarations[0].init, path.concat(node.type, VD_INIT));
-	parseNode(node.declarations[0].id, path.concat(node.type, VD_ID));
-	//store declarations information
+	parseList(node, path, node.declarations);
+}
+
+function parseVDeclarator(node, path)
+{
+	parseNode(node.init, path.concat(node.type, VD_INIT))
+	parseNode(node.id, path.concat(node.type, VD_ID));
 }
 
 function parseBE(node, path) //BinaryExpression

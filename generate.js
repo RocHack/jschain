@@ -77,6 +77,7 @@ var generateFunctions = {
 	'FunctionDeclaration': generateFD,
 	'FunctionExpression': generateFE,
 	'VariableDeclaration': generateVDeclaration,
+    'VariableDeclarator': generateVDeclarator,
 	'EmptyStatement': generateEmptyStatement,
 	'BlockStatement': generateBS,
 	'ForStatement': generateFor,
@@ -377,11 +378,9 @@ function generateFE(model, path)
 
 function generateVDeclaration(model, path)
 {
-	var declarations = [];
-	declarations.push(generateVDeclarator(model, path));
 	return {
 		type: "VariableDeclaration",
-		declarations: declarations,
+		declarations: generateList(model, path),
 		kind: "var"
 	};
 
