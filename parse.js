@@ -88,6 +88,8 @@ var RET_ARG = "RET_ARG";
 var UPDATE_ARG = "UPDATE_ARG";
 var UPDATE_OP = "UPDATE_OP";
 
+var LIST = "LIST";
+
 var END = "_end";
 var END_NODE = {type: END};
 
@@ -205,6 +207,7 @@ function parseNew(node, path) //NewExpression
 
 function parseCall(node, path)
 {
+	parseList(node, path, node.arguments);
 	parseNode(node.callee, path.concat(node.type, CALL_CALLEE));
 }
 
@@ -281,16 +284,29 @@ function parseBS(node, path)
 	parseBlock(node.body, path.concat(node.type, BODY));
 }
 
+function parseList(node, path, list)
+{
+	list = list || [];
+	path = path.concat([node.type, LIST]);
+	for (var i = 0; i < list.length; i++)
+	{
+		var elem = list[i];
+		parseNode(elem, path);
+		path = path.concat([elem.type, FOLLOW]);
+	}
+	parseNode(END_NODE, path);
+}
+
 function parseFunc(node, path)
 {
-	//params?
+	parseList(node, path, node.params);
 	parseNode(node.id, path.concat([node.type, FUNC_ID]));
 	parseNode(node.body, path.concat([node.type, FUNC_BODY]));
 }
 
 function parseFuncExp(node, path)
 {
-	//params?
+	parseList(node, path, node.params);
 	parseNode(node.body, path.concat([node.type, FUNC_E_BODY]));
 }
 
@@ -303,15 +319,7 @@ function parseCE(node, path)
 
 function parseArrayExpression(node, path)
 {
-	var expressions = node.elements || [];
-	path = path.concat([node.type, BODY]);
-	for (var i = 0; i < expressions.length; i++)
-	{
-		var expression = expressions[i];
-		parseNode(expression, path);
-		path = path.concat([expression.type, FOLLOW]);
-	}
-	parseNode(END_NODE, path);
+	parseList(node, path, node.elements);
 }
 
 function parseHandlers(handlers, path)

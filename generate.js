@@ -59,6 +59,8 @@ var UPDATE_OP = "UPDATE_OP";
 var VD_INIT = "VD_INIT";
 var VD_ID = "VD_ID";
 
+var LIST = "LIST";
+
 var NEW_CALLEE = "NEW_CALLEE";
 var NEW_ARGS = "NEW_ARGS";
 
@@ -222,7 +224,7 @@ function generateCall(model, path)
 	return {
         "type": "CallExpression",
         "callee": generateNode(model, path.concat(CALL_CALLEE)),
-        "arguments": []
+        "arguments": generateList(model, path)
     };
 }
 
@@ -336,7 +338,7 @@ function generateFD(model, path)
 	return {
 		type: "FunctionDeclaration",
 		id: generateNode(model, path.concat(FUNC_ID)),
-		params: [],
+		params: generateList(model, path),
 		defaults: [],
 		body: generateNode(model, path.concat(FUNC_BODY)),
 		rest: null,
@@ -350,7 +352,7 @@ function generateFE(model, path)
 	return {
         "type": "FunctionExpression",
         "id": null,
-        "params": [],
+        "params": generateList(model, path),
         "defaults": [],
         "body": generateNode(model, path.concat(FUNC_E_BODY)),
         "rest": null,
@@ -410,19 +412,24 @@ function generateForIn(model, path)
     };
 }
 
+function generateList(model, path)
+{
+	var sPath = path.concat(LIST);
+	var elems = [];
+	var elem = generateNode(model, sPath);
+	while (elem && elem.type != END) {
+		elems.push(elem);
+		sPath = sPath.concat(elem.type, FOLLOW);
+		elem = generateNode(model, sPath);
+	}
+	return elems;
+}
+
 function generateArrayExpression(model, path)
 {
-	var sPath = path.concat(BODY);
-	var exprs = [];
-	var expr = generateNode(model, sPath);
-	while (expr && expr.type != END) {
-		exprs.push(expr);
-		sPath = sPath.concat(expr.type, FOLLOW);
-		expr = generateNode(model, sPath);
-	}
 	return {
         type: "ArrayExpression",
-        elements: exprs
+        elements: generateList(model, path)
     }
 }
 
