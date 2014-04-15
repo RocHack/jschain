@@ -1,116 +1,51 @@
 var esprima = require("esprima");
 
-var parseFunctions = 
-{'Program':parseProgram, 
-'End':parseEnd, 
-'VariableDeclaration':parseVD, 
-'VariableDeclarator': parseVDeclarator,
-'IfStatement':parseIf, 
-'BlockStatement':parseBS,
-'BinaryExpression':parseBE,
-'UnaryExpression':parseUnaryE,
-'LogicalExpression':parseLE,
-'AssignmentExpression':parseAE,
-'NewExpression':parseNew,
-'ForStatement':parseFor,
-'ForInStatement':parseForIn,
-'WhileStatement':parseWhile,
-'FunctionDeclaration':parseFunc,
-'FunctionExpression':parseFuncExp,
-'ConditionalExpression':parseCE,
-'ArrayExpression':parseArrayExpression,
-'ObjectExpression':parseObjectExpression,
-'Property':parseProperty,
-'TryStatement':parseTryStatement,
-'ThrowStatement':parseThrowStatement,
-'CatchClause':parseCatchClause,
-'CallExpression':parseCall,
-'Identifier':parseID,
-'Literal':parseLiteral,
-'ReturnStatement':parseReturn,
-'UpdateExpression':parseUE,
-'MemberExpression':parseME};
-
-var hash = {};
-
-var BODY = "B";
 var FOLLOW = "F";
-var IF_CONS = "IF_C";
-var IF_ALT = "IF_A";
-var IF_TEST = "IF_T";
-
-var FOR_INIT = "FOR_INIT";
-var FOR_UPDATE = "FOR_UPDATE";
-var FOR_TEST = "FOR_TEST";
-var FOR_BODY = "FOR_BODY";
-
-var FOR_LEFT = "FOR_LEFT";
-var FOR_RIGHT = "FOR_RIGHT";
-
-var WHILE_TEST = "WHILE_TEST";
-var WHILE_BODY = "WHILE_BODY";
-
-var FUNC_ID = "FUNC_ID";
-var FUNC_BODY = "FUNC_BODY";
-var FUNC_E_BODY = "FUNC_E_BODY";
-
-var TRY_BLOCK = "TRY_BLOCK";
-var TRY_HANDLER = "TRY_HANDLER";
-var TRY_GHANDLER = "TRY_GHANDLER";
-var TRY_FINALIZER = "TRY_FINALIZER";
-
-var THROW_ARG = "THROW_ARG";
-
-var EXPR = "EXPR";
-var AE_LEFT = "AE_LEFT";
-var AE_RIGHT = "AE_RIGHT";
-
-var BE_LEFT = "BE_LEFT";
-var BE_RIGHT = "BE_RIGHT";
-var BE_OP = "BE_OP";
-
-var UE_ARG = "UE_ARG";
-var UE_OP = "UE_OP";
-
-var ID_NAME = "ID_NAME";
-
-var L_VAL = "L_VAL";
-
-var ME_OBJ = "ME_OBJ";
-var ME_PROP = "ME_PROP";
-var ME_PROP_ID = "ME_PROP_ID";
-var ME_COMPUTED = "ME_COMPUTED";
-
-var CALL_CALLEE = "CALL_CALLEE";
-
-var VD_INIT = "VD_INIT";
-var VD_ID = "VD_ID";
-
-var PROP_KEY = "PROP_KEY";
-var PROP_VAL = "PROP_VAL";
-
-var RET_ARG = "RET_ARG";
-
-var UPDATE_ARG = "UPDATE_ARG";
-var UPDATE_OP = "UPDATE_OP";
-
-var LIST = "LIST";
 
 var END = "_end";
 var END_NODE = {type: END};
 
-var NEW_CALLEE = "NEW_CALLEE";
-var NEW_ARGS = "NEW_ARGS";
-
 var TOTAL = "_total";
-
 
 var DEPTH, DEFAULT_DEPTH = 2;
 
-
 var goalLineNum;
 var currentLineNum;
-var pathAtLine = ['Program', BODY];
+
+var pathAtLine = ['Program', 'body'];
+
+var nodeFeatures = 
+{
+'VariableDeclaration':['declarations'],
+'VariableDeclarator':['init', 'id'],
+'BinaryExpression':['left','right','operator'],
+'UnaryExpression':['left','argument','operator'],
+'LogicalExpression':['left','right','operator'],
+'AssignmentExpression':['left','right'],
+'NewExpression':['callee','arguments'],
+'CallExpression':['arguments','callee'],
+'Identifier':['name'],
+'Literal':['value'],
+'ReturnStatement':['argument'],
+'UnaryExpression':['operator','argument'],
+'MemberExpression':['computed','object','property'],
+'IfStatement':['test','consequent','alternate'],
+'ForStatement':['init','test','update','body'],
+'ForInStatement':['left','right','body'],
+'WhileStatement':['test','body'],
+'BlockStatement':['body'],
+'FunctionDeclaration':['params','id','body'],
+'FunctionExpression':['params','body'],
+'ConditionalExpression':['test','consequent','alternate'],
+'ArrayExpression':['elements'],
+'ObjectExpression':['properties'],
+'Property':['key','value'],
+'TryStatement':['block','guardedHandlers','handlers','finalizer'],
+'CatchClause':['body'],
+'ThrowStatement':['argument'],
+'Program':['body'],
+'UpdateExpression':['operator','argument']
+};
 
 function traverse(path)
 {
@@ -148,104 +83,8 @@ function addCount(node, path)
 	}
 }
 
-function parseEnd(end, path)
-{
-}
-
-function parseVD(node, path) //VariableDeclaration
-{
-	parseList(node.declarations, path.concat(node.type, LIST));
-}
-
-function parseVDeclarator(node, path)
-{
-	parseNode(node.init, path.concat(node.type, VD_INIT))
-	parseNode(node.id, path.concat(node.type, VD_ID));
-}
-
-function parseBE(node, path) //BinaryExpression
-{
-	//store operator, lhs and rhs information
-	parseNode(node.left, path.concat(node.type, BE_LEFT));
-	parseNode(node.right, path.concat(node.type, BE_RIGHT));
-	parseNode(node.operator, path.concat(node.type, BE_OP));
-}
-
-function parseUnaryE(node, path) //UnaryExpression
-{
-	//store operator, argument
-	//prefix?
-	parseNode(node.left, path.concat(node.type, BE_LEFT));
-	parseNode(node.argument, path.concat(node.type, UE_ARG));
-	parseNode(node.operator, path.concat(node.type, UE_OP));
-}
-
-function parseLE(node, path) //LogicalExpression
-{
-	//store operator, lhs and rhs information
-	parseNode(node.left, path.concat(node.type, BE_LEFT));
-	parseNode(node.right, path.concat(node.type, BE_RIGHT));
-	parseNode(node.operator, path.concat(node.type, BE_OP));
-}
-
-function parseAE(node, path) //AssignmentExpression
-{
-	//store lhs, rhs
-	parseNode(node.left, path.concat(node.type, AE_LEFT));
-	parseNode(node.right, path.concat(node.type, AE_RIGHT));
-}
-
-function parseNew(node, path) //NewExpression
-{
-	parseNode(node.callee, path.concat(node.type, NEW_CALLEE));
-	parseList(node.arguments, path.concat(node.type, NEW_ARGS));
-}
-
-function parseCall(node, path)
-{
-	parseList(node.arguments, path.concat(node.type, LIST));
-	parseNode(node.callee, path.concat(node.type, CALL_CALLEE));
-}
-
-function parseID(node, path)
-{
-	parseNode(node.name, path.concat(node.type, ID_NAME));
-}
-
-function parseLiteral(node, path)
-{
-	parseNode(node.value, path.concat(node.type, L_VAL));
-}
-
-function parseReturn(node, path)
-{
-	parseNode(node.argument, path.concat(node.type, RET_ARG));
-}
-
-function parseUE(node, path)
-{
-	parseNode(node.operator, path.concat(node.type, UPDATE_OP));
-	parseNode(node.argument, path.concat(node.type, UPDATE_ARG));
-}
-
-function parseME(node, path)
-{
-	var meProp = node.computed ? ME_PROP : ME_PROP_ID;
-	parseNode(node.object, path.concat(node.type, ME_OBJ));
-	parseNode(node.property, path.concat(node.type, meProp));
-	parseNode(node.computed, path.concat(node.type, ME_COMPUTED));
-}
-
-function parseIf(node, path)
-{
-	parseNode(node.test, path.concat([node.type, IF_TEST]));
-	parseNode(node.consequent, path.concat([node.type, IF_CONS]));
-	parseNode(node.alternate || END_NODE, path.concat([node.type, IF_ALT]));
-}
-
 function parseList(nodes, path)
 {
-	nodes = nodes || [];
 	for (var i = 0; i < nodes.length; i++)
 	{
 		var node = nodes[i];
@@ -255,103 +94,26 @@ function parseList(nodes, path)
 	parseNode(END_NODE, path);
 }
 
-function parseFor(node, path)
-{
-	parseNode(node.init, path.concat([node.type, FOR_INIT]));
-	parseNode(node.test, path.concat([node.type, FOR_TEST]));
-	parseNode(node.update, path.concat([node.type, FOR_UPDATE]));
-	parseNode(node.body, path.concat([node.type, FOR_BODY]));
-}
-
-function parseForIn(node, path)
-{
-	parseNode(node.left, path.concat([node.type, FOR_LEFT]));
-	parseNode(node.right, path.concat([node.type, FOR_RIGHT]));
-	parseNode(node.body, path.concat([node.type, FOR_BODY]));
-}
-
-function parseWhile(node, path)
-{
-	parseNode(node.test, path.concat([node.type, WHILE_TEST]));
-	parseNode(node.body, path.concat([node.type, WHILE_BODY]));
-}
-
-function parseBS(node, path)
-{
-	parseList(node.body, path.concat(node.type, BODY));
-}
-
-function parseFunc(node, path)
-{
-	parseList(node.params, path.concat(node.type, LIST));
-	parseNode(node.id, path.concat([node.type, FUNC_ID]));
-	parseNode(node.body, path.concat([node.type, FUNC_BODY]));
-}
-
-function parseFuncExp(node, path)
-{
-	parseList(node.params, path.concat(node.type, LIST));
-	parseNode(node.body, path.concat([node.type, FUNC_E_BODY]));
-}
-
-function parseCE(node, path)
-{
-	parseNode(node.test, path.concat([node.type, IF_TEST]));
-	parseNode(node.consequent, path.concat([node.type, IF_CONS]));
-	parseNode(node.alternate, path.concat([node.type, IF_ALT]));
-}
-
-function parseArrayExpression(node, path)
-{
-	parseList(node.elements, path.concat(node.type, LIST));
-}
-
-function parseObjectExpression(node, path)
-{
-	parseList(node.properties, path.concat(node.type, LIST));
-}
-
-function parseProperty(node, path)
-{
-	parseNode(node.key, path.concat(node.type, PROP_KEY));
-	parseNode(node.value, path.concat(node.type, PROP_VAL));
-}
-
-function parseTryStatement(node, path)
-{
-	parseNode(node.block, path.concat(node.type, TRY_BLOCK));
-	parseList(node.guardedHandlers, path.concat(node.type, TRY_GHANDLER));
-	parseList(node.handlers, path.concat(node.type, TRY_HANDLER));
-	parseNode(node.finalizer, path.concat(node.type, TRY_FINALIZER));
-}
-
-function parseCatchClause(node, path)
-{
-	// param
-	parseNode(node.body, path.concat(node.type, BODY));
-}
-
-function parseThrowStatement(node, path)
-{
-	parseNode(node.argument, path.concat(node.type, THROW_ARG));
-}
-
-function parseProgram(program)
-{
-	parseList(program.body, [program.type, BODY]);
-}
-
 function parseNode(node, path)
 {
+	if (node instanceof Array)
+	{
+		parseList(node, path);
+		return;
+	}
+
 	if (!node)
+	{
 		node = END_NODE;
+	}
 	if (node.type == "ExpressionStatement")
 	{
 		node = node.expression;
 		node.expr = true;
 	}
+
 	addCount(node, path);
-	// console.log("parsing ", node.type, " path=",path);
+
 	// look for the node right before the goal line
 	if (node.loc)
 	{
@@ -363,9 +125,18 @@ function parseNode(node, path)
 			//console.log(startLineNum, node);
 		}
 	}
-	if (parseFunctions[node.type])
+
+	if (nodeFeatures[node.type])
 	{
-		parseFunctions[node.type](node, path.slice(-DEPTH*2));
+		var slicedPath = path.slice(-DEPTH*2);
+		for (var i = 0; i < nodeFeatures[node.type].length; i++)
+		{
+			var feature = nodeFeatures[node.type][i];
+			var append_to_path = '';
+			if (node.type == 'MemberExpression' && feature == 'property' && !node.computed)
+				append_to_path = '_id';
+			parseNode(node[feature], slicedPath.concat(node.type, feature+append_to_path));
+		}
 	}
 }
 
@@ -392,7 +163,7 @@ function parseSyntax(syntax, lineNum)
 function reset()
 {
 	hash = {};
-	pathAtLine = ['Program', BODY];
+	pathAtLine = ['Program', 'body'];
 	currentLineNum = 0;
 }
 
