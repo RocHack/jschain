@@ -112,20 +112,6 @@ var goalLineNum;
 var currentLineNum;
 var pathAtLine = ['Program', BODY];
 
-/*
-var ret = parseFile('var answer = x.b(); var a = x.foo(); var b = 20; var c = 1; var d = 2;');
-
-var ret = parseFile("if (a=='5') { var a = 10; } else b = 3;");
-var ret = parseFile("for (var i = 0; i < 5; i++) { var a = x; if (a == '5') { b = 5; } }");
-var ret = parseFile("while (i > 0) { var a = 4; if (a > 5) { b = 5; } i--; }");
-var ret = parseFile("function foo () { var a = function () { return 5; }; if (a == '5') { b = 5; } }");
-var ret = parseFile("var hi = {}; h = (a = 3); function foo () { if (a == '5') { b = foo(); } else { hi = 2; } return b; } function test () { for (var i = a; i > 3; i--) { test(); } } hi = 1; if (hi == 2) { hi = 2; }");
-
-// var json = JSON.stringify(ret, null, 2);
-// console.log(json);
-console.log(JSON.stringify(ret));
-*/
-
 function traverse(path)
 {
 	// console.log("traversing ",path);
