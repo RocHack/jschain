@@ -10,9 +10,8 @@ var TOTAL = "_total";
 var DEPTH = 5, DEFAULT_DEPTH = 5;
 
 var goalLineNum;
-var currentLineNum;
 
-var pathAtLine = ['Program', 'body'];
+var pathAtLine;
 
 var nodeFeatures = 
 {
@@ -117,13 +116,12 @@ function parseNode(node, path)
 
 	addCount(node, path);
 
-	// look for the node right before the goal line
+	// find the first node that starts after our goal line
 	if (node.loc)
 	{
 		var startLineNum = node.loc.start.line;
-		if (startLineNum < goalLineNum && startLineNum > currentLineNum)
+		if (!pathAtLine && startLineNum >= goalLineNum)
 		{
-			currentLineNum = startLineNum;
 			pathAtLine = path;
 			//console.log(startLineNum, node);
 		}
@@ -166,8 +164,7 @@ function parseSyntax(syntax, lineNum)
 function reset()
 {
 	hash = {};
-	pathAtLine = ['Program', 'body'];
-	currentLineNum = 0;
+	pathAtLine = null;
 }
 
 function getPathForLine()
