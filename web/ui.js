@@ -133,12 +133,15 @@ function newOptions()
 	$('#options').html("");
 
 	var snips = snippets[round];
-	numSelections = snips.length;
-	for (var i = 0; i < numSelections; i++)
+	for (var i = 0; i < snips.length; i++)
 	{
 		code = snips[i];
 		$('#options').append($('<li><pre>'+code+'</pre></li>'));
 	}
+
+	$('#options').append($('<li><pre contenteditable="true"></pre></li>'));
+
+	numSelections = snips.length+1;
 
 	currentSelection = 0;
     $($('#options').children()[currentSelection]).find('pre').css('background-color','#D7EBFC');
@@ -146,4 +149,6 @@ function newOptions()
     round += 1;
 }
 
-$(document).ready(function() {newOptions();});
+$(document).ready(function() {
+	newOptions();
+});
