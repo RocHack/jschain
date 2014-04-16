@@ -3,7 +3,7 @@ var escodegen = require("escodegen");
 var FOLLOW = "F";
 var END = "_end";
 
-var DEPTH = 5;
+var DEPTH = 4;
 
 var nodeFeatures = 
 {

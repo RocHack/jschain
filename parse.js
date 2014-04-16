@@ -7,7 +7,7 @@ var END_NODE = {type: END};
 
 var TOTAL = "_total";
 
-var DEPTH = 5, DEFAULT_DEPTH = 5;
+var DEPTH = 4, DEFAULT_DEPTH = 4;
 
 var goalLineNum;
 
