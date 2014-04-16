@@ -1,0 +1,19 @@
+body
+{
+	height:100%;
+}
+
+#editor
+{
+	height: 500px;
+	width: 100%;
+
+	background-color: rgb(253,253,253);
+
+	padding:10px;
+}
+
+pre.active
+{
+	background-color: yellow;
+}
