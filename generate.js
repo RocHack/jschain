@@ -38,7 +38,8 @@ var nodeFeatures =
 'UpdateExpression':['operator','argument'],
 'EmptyStatement': [],
 'ContinueStatement':[],
-'BreakStatement':[]
+'BreakStatement':[],
+'_end':[]
 };
 
 function generateProgram(model)
@@ -63,17 +64,62 @@ function generateList(model, path)
 
 function generateNode(model, path)
 {
+    //cut off the path at given depth
     var maxPathLength = -(DEPTH)*2;
     path = path.slice(maxPathLength);
-    // Pick the node type
-    var type;
+
+    var prevTransition = path[path.length-1];
+    var prevNodeType = path[path.length-2];
+
     var map = model;
+    //walk the model
     for (var i = 0; i < path.length; i++) {
         map = map[path[i]];
     }
+    //skip past all the _nulls if there are any (ie path isn't long enough)
     while (map._null) {
         map = map._null;
     }
+
+    var newType = pickNodeType(map);
+
+    if (newType == null) {
+        //console.log("Unable to pick node type at", path, " map = ", map);
+        throw new Error("Unable to pick node type at [" + path.join(", ") + "]");
+    }
+
+    //with operators/identifier names, the type is the literal thing
+    if (prevTransition == 'operator' || 
+        prevTransition == 'raw' || 
+        (prevNodeType == 'Identifier' && prevTransition == 'name'))
+        //escape any variables that use underscores with two, our reserved variables use only one
+        return newType.replace(/__/g, "_");
+
+    //'computed' (for member expressions) should be a boolean
+    if (prevTransition == 'computed')
+        return (newType === "true");
+
+    //means the value for this new node is literally null, not a literal which happens to be "null"
+    if (newType == "null")
+        return null;
+
+    var node = instantiateNode(newType, model, path);
+
+    //wrap an expression statement around it if it was flagged by parse to require
+    if (map._expr && newType in map._expr) {
+        node = {
+            type: "ExpressionStatement",
+            expression: node
+        };
+    }
+
+    return node;
+}
+
+function pickNodeType(map)
+{
+    var type;
+
     var total = map._total || 0;
     var pick = Math.random() * total;
     var sum = 0;
@@ -87,27 +133,13 @@ function generateNode(model, path)
             break;
         }
     }
-    if (type == null) {
-        //console.log("Unable to pick node type at", path, " map = ", map);
-        throw new Error("Unable to pick node type at [" + path.join(", ") + "]");
-    }
 
-    //with operators/ME_COMPUTED (true/false), the type is the literal thing
-    var last = path[path.length-1];
-    var last2 = path[path.length-2];
-    if (last == 'operator' || last == 'raw' || (last2 == 'Identifier' && last == 'name') || (last2 == 'Literal' && last == 'value'))
-        return type.replace(/__/g, "_");
+    return type;
+}
 
-    if (type == "null")
-        return null;
-
-    if (last == 'computed')
-        return (type === "true");
-
+function instantiateNode(type, model, path)
+{
     var node = {'type':type};
-
-    if (type == END)
-        return node;
 
     var features = nodeFeatures[type];
     if (!features)
@@ -131,9 +163,10 @@ function generateNode(model, path)
         {
             var newPath = path.concat(type, feature+feature_append);
 
-            if (feature == "properties" || feature == "arguments" || (feature == "body" && type == "BlockStatement")
-                || feature == "params" || feature == "declarations" || feature == "elements"
-                || feature == "guardedHandlers" || feature == "handlers")
+            if (feature == "properties" || feature == "arguments" ||
+                feature == "params" || feature == "declarations" || 
+                feature == "elements" || feature == "guardedHandlers" || feature == "handlers" ||
+                (feature == "body" && type == "BlockStatement")) //only BlockStatement's body is a list, Program's body is a BlockStatement
             {
                 node[feature] = generateList(model, newPath);
             }
@@ -148,13 +181,6 @@ function generateNode(model, path)
     {
         //turn raw into a value, needed by escodegen, with eval
         node["value"] = eval(node.raw);
-    }
-
-    if (map._expr && key in map._expr) {
-        node = {
-            type: "ExpressionStatement",
-            expression: node
-        };
     }
 
     return node;
