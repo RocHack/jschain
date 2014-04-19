@@ -7,7 +7,7 @@ var END_NODE = {type: END};
 
 var TOTAL = "_total";
 
-var DEPTH = 4, DEFAULT_DEPTH = 4;
+var DEPTH = 4;
 
 var goalLineNum;
 
@@ -50,13 +50,11 @@ var nodeFeatures =
 
 function traverse(path)
 {
-	// console.log("traversing ",path);
 	var working = hash;
 
-	for (var d = Math.min(DEPTH*2, path.length); d > 0; d--)
-	{
+	for (var d = Math.min(DEPTH*2, path.length); d > 0; d--) {
 		var elem = path[path.length-d];
-		// console.log("looking up ",elem, " in ",working);
+		//create the path as we go if it doesn't exist
 		working = working[elem] || (working[elem] = {});
 	}
 
@@ -65,6 +63,7 @@ function traverse(path)
 	for (; extras > 0; extras -= 2) //-=2 because we're subtracting from DEPTH*2, ie, 'program' & 'F'...
 		working = working._null || (working._null = {});
 
+	//set the running total to 0 if it doesn't already exist
 	working[TOTAL] = working[TOTAL] || 0;
 
 	return working;
@@ -86,30 +85,29 @@ function addCount(node, path)
 
 function parseList(nodes, path)
 {
-	for (var i = 0; i < nodes.length; i++)
-	{
+	for (var i = 0; i < nodes.length; i++) {
 		var node = nodes[i];
 		parseNode(node, path);
-		path = path.concat([node.type, FOLLOW]);
+		path = path.concat(node.type, FOLLOW);
 	}
 	parseNode(END_NODE, path);
 }
 
 function parseNode(node, path)
 {
-	if (node instanceof Array)
-	{
+	//arrays are parsed with parseList
+	if (node instanceof Array) {
 		parseList(node, path);
 		return;
 	}
 
-	if (node == null)
-	{
+	//mark null nodes with "null" text
+	if (node == null) {
 		node = "null";
 	}
 
-	if (node.type == "ExpressionStatement")
-	{
+	//for expression statements, use the actual statement & mark that it was wrapped in an expression
+	if (node.type == "ExpressionStatement") {
 		node = node.expression;
 		node.expr = true;
 	}
@@ -117,54 +115,38 @@ function parseNode(node, path)
 	addCount(node, path);
 
 	// find the first node that starts after our goal line
-	if (node.loc)
-	{
+	if (node.loc) {
 		var startLineNum = node.loc.start.line;
-		if (!pathAtLine && startLineNum >= goalLineNum)
-		{
+		if (!pathAtLine && startLineNum >= goalLineNum) {
 			pathAtLine = path;
 			//console.log(startLineNum, node);
 		}
 	}
 
-	if (nodeFeatures[node.type])
-	{
-		var slicedPath = path.slice(-DEPTH*2);
-		for (var i = 0; i < nodeFeatures[node.type].length; i++)
-		{
-			var feature = nodeFeatures[node.type][i];
+	var features = nodeFeatures[node.type];
+	var slicedPath = path.slice(-DEPTH*2);
+	if (features) {
+		//go through each feature and add that to the model
+		for (var i = 0; i < features.length; i++) {
+			var feature = features[i];
+
 			var append_to_path = '';
 			if (node.type == 'MemberExpression' && feature == 'property' && !node.computed)
 				append_to_path = '_id';
+
 			parseNode(node[feature], slicedPath.concat(node.type, feature+append_to_path));
 		}
 	}
 }
 
-function parseFile(text, d)
-{
-	// reset();
-
-	DEPTH = d || DEFAULT_DEPTH;
-	var syntax = esprima.parse(text, {tolerant: true});
-	parseNode(syntax, []);
-	return hash;
-}
-
 function parseSyntax(syntax, lineNum)
-{
-	reset();
-	goalLineNum = lineNum;
-
-	DEPTH = DEFAULT_DEPTH;
-	parseNode(syntax, []);
-	return hash;
-}
-
-function reset()
 {
 	hash = {};
 	pathAtLine = null;
+	goalLineNum = lineNum;
+
+	parseNode(syntax, []);
+	return hash;
 }
 
 function getPathForLine()
@@ -172,7 +154,5 @@ function getPathForLine()
 	return pathAtLine;
 }
 
-module.exports.parseFile = parseFile;
 module.exports.parseSyntax = parseSyntax;
-module.exports.reset = reset;
 module.exports.getPathForLine = getPathForLine;
