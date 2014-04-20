@@ -27,6 +27,16 @@ function checkKey(e)
 	        // down arrow
 	    	currentSelection += 1;
 	    }
+		else if (e.keyCode == 37)
+		{
+			// left arrow
+			moveCursor(false);
+	    }
+		else if (e.keyCode == 39)
+		{
+			// right arrow
+			moveCursor(true);
+		}
 
 	    $($('#options').children()[currentSelection]).find('pre').css('background-color','#D7EBFC');
     }
@@ -57,6 +67,53 @@ function addHandlers() {
 			e.stopPropagation();
 		}
 	});
+}
+
+// credit: https://stackoverflow.com/a/5386150
+jQuery.fn.reverse = [].reverse;
+
+jQuery.fn.eachDir = function(fn, forward) {
+	var obj = forward ? this : this.reverse();
+	return obj.each(fn);
+};
+
+function moveCursor(forward) {
+	var dirAll = forward ? 'nextAll' : 'prevAll';
+	// find the next/previous statement
+	var node, elem, found;
+	function findStatement(i, el) {
+		var n = $(el).data('node');
+		console.log("NODE!", n, el.innerText);
+		if (n) {
+			console.log("go to children");
+			$(el).children('.statement').eachDir(findStatement, forward);
+			if (found) return false;
+		}
+		if (!n) return;
+		if (isStatement(n.type))
+		{
+			node = n;
+			elem = el;
+			found = true;
+			return false;
+		}
+	}
+	var from = cursor.prev();
+	var i = 0;
+	while (!found && from.length) {
+		if (i++ > 50) throw new Error("too much recursion");
+		from[dirAll]('.statement').each(findStatement);
+		console.log("go to parent", from);
+		from = from.parent();
+	}
+	if (!from) {
+		// set it to the beginning
+	}
+	console.log("Found:", found, "elem", elem.innerText);
+	if (!node) return;
+	window.setCurrentPathToNode(node);
+	cursor.insertAfter(elem);
+	newOptions();
 }
 
 function complete(option)
