@@ -17,6 +17,8 @@ body
 {
 	background-color: red;	
 	border-radius: 3px;
+	display:block;
+	width:10px;
 }
 
 .statement

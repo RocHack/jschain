@@ -55,9 +55,19 @@ function addHandlers() {
 
 function complete(option)
 {
-	console.log("generating from position ",window.getCurrentPosition());
+	var selectedLine = cursor.parent().text();
+	selectedLine = selectedLine.replace(/^\{\n/, "");
+	var spaces = "";
+	var numspaces = selectedLine.match(/^ */)[0].length;
+	if (numspaces == 1) numspaces = 0;
+	for (var i = 0; i < numspaces; i++)
+		spaces += " ";
+	console.log("line = ",selectedLine,"  spaces = ",numspaces);
 
-	console.log("cursor");
+
+	// console.log("generating from position ",window.getCurrentPosition());
+
+	// console.log("cursor");
 
 	var node = $($(option).children()[0]).data('node');
 	console.log("snippet = ",$($(option).children()[0])," node = ",node);
@@ -66,9 +76,14 @@ function complete(option)
 
 	if (node.type != "Program")
 		window.setCurrentPathToNode(node);
-
+	
 	var snippet = $(option).children();
-	snippet.insertAfter(cursor);
+	snippet.each(function () {
+		if (numspaces > 0)
+			//$(this).prepend($("<span>"+spaces+"</span>"));
+			$(this).css('padding-left','16px').css('display','inline-block');
+		$(this).insertAfter(cursor);
+	});
 	$("<br>").insertAfter(cursor);
 	newOptions();
 

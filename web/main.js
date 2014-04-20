@@ -83,13 +83,13 @@ window.setCurrentPathToNode = function (node) {
 	if (node.type == "ExpressionStatement")
 		node = node.expression;
 
-	console.log("looking for", node, " in ",tree);
+	// console.log("looking for", node, " in ",tree);
 	currentPosition = getPath(tree, node);
 	if (!currentPosition) {
 		console.log("tree:", JSON.stringify(tree), 'Node:', JSON.stringify(node));
 	}
 
-	console.log("current position is ",currentPosition);
+	// console.log("current position is ",currentPosition);
 }
 
 window.insertSnippet = function (node) {
