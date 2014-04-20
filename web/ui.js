@@ -34,8 +34,8 @@ function checkKey(e)
 
 function isStatement(nodeType)
 {
-	return nodeType == "VariableDeclaration" ||
-		nodeType.match(/Statement$/);
+	if (nodeType == "BlockStatement") return false;
+	return nodeType.match(/(Statement|Declaration)$/);
 }
 
 var cursor;
@@ -84,7 +84,7 @@ function newOptions()
 {
 	$('#options').html("");
 
-	var snips = window.getSnippets(3);
+	var snips = window.getSnippets(6);
 	for (var i = 0; i < snips.length; i++)
 	{
 		code = snips[i];
