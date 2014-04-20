@@ -45,7 +45,8 @@ var nodeFeatures =
 'Program':['body'],
 'UpdateExpression':['operator','argument'],
 'ContinueStatement':[],
-'BreakStatement':[]
+'BreakStatement':[],
+'SequenceExpression':['expressions']
 };
 
 function traverse(path)

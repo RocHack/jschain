@@ -42,6 +42,7 @@ var nodeFeatures =
 'EmptyStatement': [],
 'ContinueStatement':[],
 'BreakStatement':[],
+'SequenceExpression':['expressions'],
 '_end':[]
 };
 
@@ -190,7 +191,8 @@ function instantiateNode(type, model, path)
 
             if (feature == "properties" || feature == "arguments" ||
                 feature == "params" || feature == "declarations" || 
-                feature == "elements" || feature == "guardedHandlers" || feature == "handlers" ||
+                feature == "elements" || feature == "guardedHandlers" ||
+				feature == "handlers" || feature == "expressions" ||
                 (feature == "body" && type == "BlockStatement")) //only BlockStatement's body is a list, Program's body is a BlockStatement
             {
                 node[feature] = generateList(model, newPath);

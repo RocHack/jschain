@@ -115,7 +115,7 @@ window.insertSnippet = function (node) {
 function generateProgramSource() {
 	console.log("**** generating snippet from path ",currentPosition.path);
 
-	var syntax = generate.generateNode(model, currentPosition.path, true, 2);
+	var syntax = generate.generateNode(model, currentPosition.path, true, depth);
 	if (!syntax || syntax.type == END) {
 		return;
 	}
@@ -123,9 +123,8 @@ function generateProgramSource() {
 	try {
 		source = escodegen.generate(syntax, escodegenOptions);
 	} catch(e) {
-		console.log("generate", e);
+		console.error("generate", e);
 	}
-
 	return source;
 }
 
