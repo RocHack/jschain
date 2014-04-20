@@ -14,7 +14,7 @@ var model = window.corpusModel;
 
 var tree;
 
-var currentPosition = ['Program', 'body'];
+var currentPosition = {"path":[]};
 
 var astDomMap = {};
 
@@ -30,8 +30,8 @@ function objectsEqual(a, b) {
 
 var FOLLOW = "F";
 // looking for node in syntax
-function getPath(syntax, node, depth, path) {
-	console.log(syntax, node, depth, path);
+function getPath(syntax, node, depth, path, container, idx) {
+	//console.log(syntax, node, depth, path);
 	if (!path) {
 		path = [];
 	}
@@ -39,7 +39,7 @@ function getPath(syntax, node, depth, path) {
 		return;
 	}
 	if (objectsEqual(syntax, node)) {
-		return path;
+		return {"path":path, "container":container, "idx":idx};
 	}
 	if (syntax.type) {
 		path = path.concat(syntax.type);
@@ -50,7 +50,7 @@ function getPath(syntax, node, depth, path) {
 	if (syntax instanceof Array) {
 		for (var i = 0; i < syntax.length; i++) {
 			var item = syntax[i];
-			var p = getPath(item, node, depth, path);
+			var p = getPath(item, node, depth, path, syntax, i);
 			if (p) return p;
 			path.push(item.type, FOLLOW);
 		}
@@ -58,7 +58,7 @@ function getPath(syntax, node, depth, path) {
 	}
 	for (var key in syntax) {
 		if (key != "type" && hasOwnProp(syntax, key)) {
-			var p = getPath(syntax[key], node, depth, path.concat(key));
+			var p = getPath(syntax[key], node, depth, path.concat(key), syntax, key);
 			if (p) return p;
 		}
 	}
@@ -69,11 +69,29 @@ function setCurrentPath(path) {
 }
 
 window.setCurrentPathToNode = function (node) {
+
+	// console.log("looking for", node, " in ",tree);
 	currentPosition = getPath(tree, node);
+
+	// console.log("current position is ",currentPosition);
+}
+
+window.insertSnippet = function (node) {
+	if (!tree)
+	{
+		tree = node;
+		currentPosition = {"path":['Program','body'], "container":node.body, "idx":0};
+	}
+	else
+	{
+		currentPosition.container.splice(currentPosition.idx+1, 0, node);
+	}
 }
 
 function generateProgramSource() {
-	var syntax = generate.generateNode(model, currentPosition, true);
+	console.log("**** generating snippet from path ",currentPosition.path);
+
+	var syntax = generate.generateNode(model, currentPosition.path, true);
 	var source = escodegen.generate(syntax, escodegenOptions);
 	return source;
 }

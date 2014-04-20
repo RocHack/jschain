@@ -39,9 +39,18 @@ function isStatement(nodeType)
 
 function complete(option)
 {
-	console.log("generating from position "+window.getCurrentPosition());
+	console.log("generating from position ",window.getCurrentPosition());
 
 	var cursor = $('#cursor');
+
+	var node = $($(option).children()[0]).data('node');
+	console.log("snippet = ",$($(option).children()[0])," node = ",node);
+
+	window.insertSnippet(node);
+
+	if (node.type != "Program")
+		window.setCurrentPathToNode(node);
+
 
 	var snippet = $($(option).html());
 	snippet.insertAfter(cursor);
@@ -57,12 +66,11 @@ function complete(option)
 				window.setCurrentPathToNode(node);
 
 				cursor.insertAfter($(this));
+
+				newOptions();
 			});
 		}
 	});
-
-	var node = $(option).data('node');
-	window.setCurrentPathToNode(node);
 
 	cursor.insertAfter(snippet);
 }
