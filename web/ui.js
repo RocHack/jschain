@@ -2,6 +2,8 @@ document.onkeydown = checkKey;
 
 var currentSelection = 0;
 var numSelections = 0;
+var editor;
+var cursor;
 
 function checkKey(e)
 {
@@ -56,7 +58,6 @@ function isStatement(nodeType)
 	return nodeType.match(/(Statement|Declaration)$/);
 }
 
-var cursor;
 function addHandlers() {
 	$('#options').on('click', 'pre', function() {
 		var options = $('#options').children();
@@ -64,7 +65,7 @@ function addHandlers() {
 		currentSelection = $(this.parentNode).index();
 		$(options[currentSelection]).find('pre').css('background-color','#D7EBFC');
 	});
-	$("#editor").on('click', '.statement', function(e) {
+	editor.on('click', '.statement', function(e) {
 		var el = $(this);
 		var node = el.data('node');
 		if (isStatement(node.type))
@@ -121,7 +122,15 @@ function moveCursor(forward) {
 	if (!node) return;
 	window.setCurrentPathToNode(node);
 	cursor.insertAfter(elem);
+	scrollIntoView(editor, cursor);
 	newOptions();
+}
+
+function scrollIntoView(container, elem) {
+	var offset = cursor.offset().top - editor.offset().top;
+	if (offset < 0 || offset > container.height()) {
+		container.scrollTop(container.scrollTop() + offset);
+	}
 }
 
 function complete(option)
@@ -199,6 +208,7 @@ function newOptions()
 }
 
 $(document).ready(function() {
+	editor = $('#editor');
 	cursor = $('#cursor');
 	addHandlers();
 	newOptions();
