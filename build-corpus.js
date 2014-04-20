@@ -6,7 +6,7 @@ var modelDest = "web/corpus-model.js";
 var model = {};
 
 var space = +process.argv[2] || 0;
-var depth = 2;
+var depth = 4;
 
 var filesDir = "js-files";
 fs.readdirSync(filesDir).forEach(function (name) {

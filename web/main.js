@@ -12,6 +12,7 @@ var escodegenOptions = {
 	}
 };
 var END = "_end";
+var depth = 4;
 
 var model = window.corpusModel;
 
