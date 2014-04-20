@@ -79,6 +79,11 @@ function generateNode(model, path, sel)
     if (sel != undefined)
         singleElementLists = sel;
 
+    if (!path || path.length == 0)
+    {
+        return generateProgram(model);
+    }
+
     //cut off the path at given depth
     var maxPathLength = -(DEPTH)*2;
     path = path.slice(maxPathLength);

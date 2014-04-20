@@ -13,7 +13,21 @@ body
 	padding:10px;
 }
 
-pre.active
+#cursor
 {
-	background-color: yellow;
+	background-color: red;	
+	border-radius: 3px;
+}
+
+.statement
+{
+	background-color: rgba(242,242,242,0.5);
+	border-radius: 3px;
+}
+
+
+pre < .statement
+{
+	background-color: clear;
+	border-radius: 3px;
 }

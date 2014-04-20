@@ -7,7 +7,7 @@ function checkKey(e)
 {
     e = e || window.event;
 
-    var selectedDiv = $($('#options').children()[currentSelection]);
+    var selectedDiv = $($('#options').children()[currentSelection]).find('pre');
 
     if (e.keyCode == '13') //enter key
     {
@@ -34,8 +34,41 @@ function checkKey(e)
 
 function complete(option)
 {
-	$('#editor').append($(option).text()+"\n");
+	console.log("generating from position "+window.getCurrentPosition());
+
+	var cursor = $('#cursor');
+
+	var snippet = $($(option).html());
+	snippet.insertAfter(cursor);
+	$("<br>").insertAfter(cursor);
+	//$('#editor').append("\n");
 	newOptions();
+
+	$(snippet).find('.statement').each(function() {
+		//deepest node, ie, one we can click
+		if ($(this).children().length == 0)
+		{
+			$(this).click(function() {
+				var node = $(this).data('node');
+
+				window.setCurrentPathToNode(node);
+				console.log(node);
+
+				cursor.insertAfter($(this));
+			});
+		}
+	});
+
+	var node = $(option).data('node');
+	window.registerNodeWithCurrentPath(node);
+	window.setCurrentPathToNode(node);
+
+	cursor.insertAfter(snippet);
+}
+
+function moveCursorToPath(path)
+{
+
 }
 
 function newOptions()
@@ -46,7 +79,7 @@ function newOptions()
 	for (var i = 0; i < snips.length; i++)
 	{
 		code = snips[i];
-		var pre = $('<pre></pre>').text(code);
+		var pre = $('<pre></pre>').html(code);
 		$('#options').append($('<li></li>').append(pre));
 	}
 
