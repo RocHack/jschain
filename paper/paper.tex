@@ -34,29 +34,38 @@ Probabilistic Programming
 \end{abstract}
 
 \section{Introduction}
-For many people just starting out, programming can seem like a confusing and tedious activity. It can be unclear for 
-many new programmers where they should begin and what should come next while coding. Without any proper guidance, 
-a novice programmer is left on their own to scour thousands of pages online to discover what should come next in 
-their code. Then, once a person becomes more adept at programming, he or she may notice that they are typing out 
-the same or similar lines of code within each new program. This repetitiveness slows down the user and can make 
-programming a much more tiresome task than it needs to be. These observations steered our group towards developing
-a way for someone to code with more instruction and productivity. The Probabilistic Programming method allows for a user to code in JavaScript
-using a web application. This web app provides a list of suggestions for the user's next line of code depending on where
-the user is in their program. Not only is this helpful for new programmers that need suggestions for what to write next 
-in their code, this system allows for expert programmers to write code with a great deal more ease and efficiency.
+For many people just starting out, programming can seem like a confusing and
+tedious activity. It can be unclear for many new programmers where they should
+begin and what should come next while coding. Without any proper guidance, a
+novice programmer is left on their own to scour thousands of pages online to
+discover what should come next in their code. Then, once a person becomes more
+adept at programming, he or she may notice that they are typing out the same or
+similar lines of code within each new program. This repetitiveness slows down
+the user and can make programming a much more tiresome task than it needs to be.
+These observations steered our group towards developing a way for someone to
+code with more instruction and productivity. The Probabilistic Programming
+method allows for a user to code in JavaScript using a web application. This web
+app provides a list of suggestions for the user's next line of code depending on
+where the user is in their program. Not only is this helpful for new programmers
+that need suggestions for what to write next in their code, this system allows
+for expert programmers to write code with a great deal more ease and efficiency.
 
 \subsection{Motivation}
 
 % overview of markov chain
-A primary motivation for undertaking this project was trying to find a new and interesting way to apply a Markov Chain.
-A Markov Chain is a stochastic process that uses the current state and a set of probabilities to determine what 
-state comes next. In the most simple case of a Markov Chain, the next action is based only upon the current situation
-and all other previous actions are forgotten. Thus, this process is essentially memoryless because all past states can
-be forgotten once a new state is reached. A good example of a Markov Chain is a random walk where at each integer value,
-the process chooses a new value such that the two possible values are the current value plus 1 and the current value
-minus 1. The transition probabilities for both of these options is .5. This is a good example of a Markov Chain because
-the next value on the random walk only depends on the current value in the walk; all previous values are not needed 
-to choose the next value \cite{markov}. 
+A primary motivation for undertaking this project was trying to find a new and
+interesting way to apply a Markov Chain.  A Markov Chain is a stochastic process
+that uses the current state and a set of probabilities to determine what state
+comes next. In the most simple case of a Markov Chain, the next action is based
+only upon the current situation and all other previous actions are forgotten.
+Thus, this process is essentially memoryless because all past states can be
+forgotten once a new state is reached. A good example of a Markov Chain is a
+random walk where at each integer value, the process chooses a new value such
+that the two possible values are the current value plus 1 and the current value
+minus 1. The transition probabilities for both of these options is .5. This is a
+good example of a Markov Chain because the next value on the random walk only
+depends on the current value in the walk; all previous values are not needed to
+choose the next value \cite{markov}. 
 
 % application of markov chain to abstact syntrax tree
 
