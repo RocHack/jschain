@@ -68,8 +68,9 @@ function generateList(model, path)
     }
 
     while (node.type != END) {
+        var type = (node.type == "ExpressionStatement" ? node.expression.type : node.type);
         nodes.push(node);
-        path = path.concat(node.type, FOLLOW);
+        path = path.concat(type, FOLLOW);
         node = generateNode(model, path);
     }
     return nodes;
@@ -89,6 +90,8 @@ function generateNode(model, path, sel, depth)
     //cut off the path at given depth
     var maxPathLength = -(DEPTH)*2;
     path = path.slice(maxPathLength);
+
+    // console.log("generating with path "+path);
 
     var prevTransition = path[path.length-1];
     var prevNodeType = path[path.length-2];
@@ -203,6 +206,14 @@ function instantiateNode(type, model, path)
     {
         //turn raw into a value, needed by escodegen, with eval
         node["value"] = eval(node.raw);
+
+        var my_escape = function (string) {
+            if (typeof string != "string") return string;
+            return string.replace(/>/g,"&gt;").replace(/</g,"&lt;").replace(/&/g,"&amp;");
+        };
+
+        if (typeof node.value == "string")
+            node.value = my_escape(node.value);
     }
 
     return node;

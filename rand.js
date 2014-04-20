@@ -20,7 +20,7 @@ fs.readFile("parse.js", 'utf8', function (err,data) {
         {
             //print out the model & syntax if an extra param is passed in
             console.log(JSON.stringify(model, null, 4));
-            console.log(JSON.stringify(syntax, null, 4));
+            //console.log(JSON.stringify(syntax, null, 4));
         }
         else
         {

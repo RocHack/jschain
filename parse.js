@@ -76,6 +76,7 @@ function addCount(node, path)
 	var key = (node.type == END) ? type : type.toString().replace(/_/g, "__");
 	probs[key] = (Object.prototype.hasOwnProperty.call(probs, key) ? probs[key] : 0) + 1;
 	probs[TOTAL] += 1;
+	//console.log("addCount for ",key, "path = "+ path);
 	if (node.expr) {
 		// mark that the node is wrapped by an expression
 		var expr = probs['_expr'] || (probs['_expr'] = {});
@@ -88,6 +89,9 @@ function parseList(nodes, path)
 	for (var i = 0; i < nodes.length; i++) {
 		var node = nodes[i];
 		parseNode(node, path);
+		if (node.type == "ExpressionStatement") {
+			node = node.expression;
+		}
 		path = path.concat(node.type, FOLLOW);
 	}
 	parseNode(END_NODE, path);

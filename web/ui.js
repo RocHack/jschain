@@ -67,7 +67,6 @@ function complete(option)
 	if (node.type != "Program")
 		window.setCurrentPathToNode(node);
 
-
 	var snippet = $(option).children();
 	snippet.insertAfter(cursor);
 	$("<br>").insertAfter(cursor);
@@ -93,9 +92,9 @@ function newOptions()
 		$('#options').append($('<li></li>').append(pre));
 	}
 
-	$('#options').append($('<li><pre contenteditable="true"></pre></li>'));
+	//$('#options').append($('<li><pre contenteditable="true"></pre></li>'));
 
-	numSelections = snips.length+1;
+	numSelections = snips.length;
 
 	currentSelection = 0;
     $($('#options').children()[currentSelection]).find('pre').css('background-color','#D7EBFC');

@@ -38,10 +38,15 @@ function getPath(syntax, node, depth, path, container, idx) {
 	if (!syntax || typeof syntax != "object") {
 		return;
 	}
+	if (syntax.type == "ExpressionStatement")
+		syntax = syntax.expression;
+
 	if (objectsEqual(syntax, node)) {
-		return {"path":path.concat(node.type, FOLLOW),
-			"container":container, "idx":idx};
+		if (path[path.length-1] == FOLLOW || path[path.length-1] == 'body')
+			path = path.concat(node.type, FOLLOW)
+		return {"path":path, "container":container, "idx":idx};
 	}
+
 	if (syntax.type) {
 		path = path.concat(syntax.type);
 		if (depth) {
@@ -52,6 +57,9 @@ function getPath(syntax, node, depth, path, container, idx) {
 		for (var i = 0; i < syntax.length; i++) {
 			var item = syntax[i];
 			if (!item) continue;
+			if (item.type == "ExpressionStatement")
+				item = item.expression;
+
 			var p = getPath(item, node, depth, path, syntax, i);
 			if (p) return p;
 			path.push(item.type, FOLLOW);
@@ -71,6 +79,9 @@ function setCurrentPath(path) {
 }
 
 window.setCurrentPathToNode = function (node) {
+
+	if (node.type == "ExpressionStatement")
+		node = node.expression;
 
 	console.log("looking for", node, " in ",tree);
 	currentPosition = getPath(tree, node);
@@ -101,15 +112,15 @@ function generateProgramSource() {
 	console.log("**** generating snippet from path ",currentPosition.path);
 
 	var syntax = generate.generateNode(model, currentPosition.path, true, 2);
-	if (syntax.type == END) {
+	if (!syntax || syntax.type == END) {
 		return;
 	}
 	var source;
-	try {
+	//try {
 		source = escodegen.generate(syntax, escodegenOptions);
-	} catch(e) {
-		console.log("generate", e);
-	}
+	// } catch(e) {
+	// 	console.log("generate", e);
+	// }
 	return source;
 }
 
