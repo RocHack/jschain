@@ -5,6 +5,8 @@ var END = "_end";
 
 var DEPTH = 4;
 
+var singleElementLists = false;
+
 var nodeFeatures = 
 {
 'VariableDeclaration':['declarations',['kind','var']],
@@ -54,6 +56,16 @@ function generateList(model, path)
 {
     var nodes = [];
     var node = generateNode(model, path);
+    
+    if (singleElementLists)      
+    {
+        if (node.type == END)
+            return [];
+        //while (node.type == END)
+            //node = generateNode(model, path);
+        return [node];
+    }
+
     while (node.type != END) {
         nodes.push(node);
         path = path.concat(node.type, FOLLOW);
@@ -62,8 +74,11 @@ function generateList(model, path)
     return nodes;
 }
 
-function generateNode(model, path)
+function generateNode(model, path, sel)
 {
+    if (sel != undefined)
+        singleElementLists = sel;
+
     //cut off the path at given depth
     var maxPathLength = -(DEPTH)*2;
     path = path.slice(maxPathLength);
