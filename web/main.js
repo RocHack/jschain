@@ -1,6 +1,8 @@
 var parse = require("../parse");
 var generate = require("../generate");
 var escodegen = require("escodegen");
+var esprima = require('esprima');
+
 
 var escodegenOptions = {
 	format: {
@@ -102,6 +104,7 @@ window.insertSnippet = function (node) {
 	{
 		if (isNaN(currentPosition.idx)) {
 			currentPosition.container[currentPosition.idx] = node;
+			return true;
 		} else {
 			currentPosition.container.splice(currentPosition.idx+1, 0, node);
 		}
@@ -116,11 +119,12 @@ function generateProgramSource() {
 		return;
 	}
 	var source;
-	//try {
+	try {
 		source = escodegen.generate(syntax, escodegenOptions);
-	// } catch(e) {
-	// 	console.log("generate", e);
-	// }
+	} catch(e) {
+		console.log("generate", e);
+	}
+
 	return source;
 }
 

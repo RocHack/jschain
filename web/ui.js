@@ -72,22 +72,34 @@ function complete(option)
 	var node = $($(option).children()[0]).data('node');
 	console.log("snippet = ",$($(option).children()[0])," node = ",node);
 
-	window.insertSnippet(node);
+	var replaced = window.insertSnippet(node);
+
 
 	if (node.type != "Program")
 		window.setCurrentPathToNode(node);
 	
 	var snippet = $(option).children();
-	snippet.each(function () {
-		if (numspaces > 0)
-			//$(this).prepend($("<span>"+spaces+"</span>"));
-			$(this).css('padding-left','16px').css('display','inline-block');
-		$(this).insertAfter(cursor);
-	});
-	$("<br>").insertAfter(cursor);
+
+	if (replaced)
+	{
+		cursor.prev().replaceWith(snippet);
+		snippet = null;
+	}
+	else
+	{
+		snippet.each(function () {
+			if (numspaces > 0)
+				//$(this).prepend($("<span>"+spaces+"</span>"));
+				$(this).css('padding-left','16px').css('display','inline-block');
+			$(this).insertAfter(cursor);
+		});
+		$("<br>").insertAfter(cursor);
+	}
+	
 	newOptions();
 
-	cursor.insertAfter(snippet);
+	if (snippet)
+		cursor.insertAfter(snippet);
 }
 
 function moveCursorToPath(path)
