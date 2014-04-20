@@ -32,6 +32,11 @@ function checkKey(e)
     }
 }
 
+function isStatement(nodeType)
+{
+	return true;
+}
+
 function complete(option)
 {
 	console.log("generating from position "+window.getCurrentPosition());
@@ -41,18 +46,15 @@ function complete(option)
 	var snippet = $($(option).html());
 	snippet.insertAfter(cursor);
 	$("<br>").insertAfter(cursor);
-	//$('#editor').append("\n");
 	newOptions();
 
-	$(snippet).find('.statement').each(function() {
-		//deepest node, ie, one we can click
-		if ($(this).children().length == 0)
+	$(snippet).each(function() {
+		var node = $(this).data('node');
+		if (isStatement(node.type))
 		{
 			$(this).click(function() {
-				var node = $(this).data('node');
-
-				window.setCurrentPathToNode(node);
 				console.log(node);
+				window.setCurrentPathToNode(node);
 
 				cursor.insertAfter($(this));
 			});
@@ -60,7 +62,6 @@ function complete(option)
 	});
 
 	var node = $(option).data('node');
-	window.registerNodeWithCurrentPath(node);
 	window.setCurrentPathToNode(node);
 
 	cursor.insertAfter(snippet);

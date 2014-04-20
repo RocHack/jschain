@@ -20,17 +20,6 @@ function array(length) {
 	return new Array(length).join(".").split(".");
 }
 
-window.registerNodeWithPath = function (node, path) {
-	astDomMap[node] = path;
-}
-
-window.registerNodeWithCurrentPath = function (node) {
-	console.log("registering ");
-	console.log(node);
-	console.log(" to "+currentPosition);
-	astDomMap[node] = currentPosition;
-}
-
 function setCurrentPath(path) {
 	currentPosition = path;
 }
