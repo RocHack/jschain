@@ -9,36 +9,44 @@ function checkKey(e)
 
     var selectedDiv = $($('#options').children()[currentSelection]).find('pre');
 
-    if (e.keyCode == '13') //enter key
+    if (e.keyCode == 13)
     {
+		//enter key
     	complete(selectedDiv);
     }
-    else
+	else if (e.keyCode == 32)
+	{
+		// space key
+		newOptions();
+		e.preventDefault();
+    }
+	else if (e.keyCode == 37)
+	{
+		// left arrow
+		moveCursor(false);
+	}
+	else if (e.keyCode == 39)
+	{
+		// right arrow
+		moveCursor(true);
+	}
+    else if (e.keyCode == 38 || e.keyCode == 40)
     {
 	    $($('#options').children()[currentSelection]).find('pre').css('background-color','clear');
 
-	    if (e.keyCode == '38' && currentSelection > 0)
+	    if (e.keyCode == 38 && currentSelection > 0)
 	    {
 	        // up arrow
 			currentSelection -= 1;
 	    }
-	    else if (e.keyCode == '40' && currentSelection < numSelections-1)
+	    else if (e.keyCode == 40 && currentSelection < numSelections-1)
 	    {
 	        // down arrow
 	    	currentSelection += 1;
 	    }
-		else if (e.keyCode == 37)
-		{
-			// left arrow
-			moveCursor(false);
-	    }
-		else if (e.keyCode == 39)
-		{
-			// right arrow
-			moveCursor(true);
-		}
 
 	    $($('#options').children()[currentSelection]).find('pre').css('background-color','#D7EBFC');
+		e.preventDefault();
     }
 }
 
