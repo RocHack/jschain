@@ -46,8 +46,8 @@ function newOptions()
 	for (var i = 0; i < snips.length; i++)
 	{
 		code = snips[i];
-		var pre = ($('<pre></pre>')).text(code);
-		$('#options').append($('<li></li>')).append(pre);
+		var pre = $('<pre></pre>').text(code);
+		$('#options').append($('<li></li>').append(pre));
 	}
 
 	$('#options').append($('<li><pre contenteditable="true"></pre></li>'));
