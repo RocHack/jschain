@@ -202,4 +202,19 @@ $(document).ready(function() {
 	cursor = $('#cursor');
 	addHandlers();
 	newOptions();
+
+	$('#output').hide();
+	$(".run-btn").click(function () {
+		$('#output').show();
+		var program = $('#editor').text();
+		var ret;
+		try {
+			//var require = window.require;
+			ret = eval(program);
+		}
+		catch (e) {
+			ret = e;
+		}
+		$('#output').html(ret);
+	});
 });

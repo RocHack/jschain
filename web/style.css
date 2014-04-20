@@ -17,7 +17,7 @@ body
 {
 	background-color: red;	
 	border-radius: 3px;
-	display:block;
+	display:inline-block;
 	width:10px;
 }
 
@@ -32,4 +32,14 @@ pre < .statement
 {
 	background-color: clear;
 	border-radius: 3px;
+}
+
+.run-btn
+{
+	/*float: right;*/
+}
+
+#output
+{
+	margin-top: 5px;
 }
