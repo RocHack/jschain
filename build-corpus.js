@@ -6,6 +6,7 @@ var modelDest = "web/corpus-model.js";
 var model = {};
 
 var space = +process.argv[2] || 0;
+var depth = 2;
 
 var filesDir = "js-files";
 fs.readdirSync(filesDir).forEach(function (name) {
@@ -24,7 +25,7 @@ fs.readdirSync(filesDir).forEach(function (name) {
 		return;
 	}
 	try {
-		parse.parseSyntax(syntax, null, model);
+		parse.parseSyntax(syntax, null, depth, model);
 	} catch(e) {
 		console.error("Error parsing syntax:", e);
 	}

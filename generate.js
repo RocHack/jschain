@@ -38,6 +38,7 @@ var nodeFeatures =
 'ThrowStatement':['argument'],
 'Program':['body'],
 'UpdateExpression':['operator','argument'],
+'ThisExpression':[],
 'EmptyStatement': [],
 'ContinueStatement':[],
 'BreakStatement':[],
@@ -74,8 +75,9 @@ function generateList(model, path)
     return nodes;
 }
 
-function generateNode(model, path, sel)
+function generateNode(model, path, sel, depth)
 {
+	if (depth) DEPTH = depth;
     if (sel != undefined)
         singleElementLists = sel;
 

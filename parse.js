@@ -139,9 +139,10 @@ function parseNode(node, path)
 	}
 }
 
-function parseSyntax(syntax, lineNum, model)
+function parseSyntax(syntax, lineNum, depth, model)
 {
 	hash = model || {};
+	if (depth) DEPTH = depth;
 	pathAtLine = null;
 	goalLineNum = lineNum;
 

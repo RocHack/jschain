@@ -9,6 +9,7 @@ var escodegenOptions = {
 		}
 	}
 };
+var END = "_end";
 
 var model = window.corpusModel;
 
@@ -31,7 +32,6 @@ function objectsEqual(a, b) {
 var FOLLOW = "F";
 // looking for node in syntax
 function getPath(syntax, node, depth, path, container, idx) {
-	//console.log(syntax, node, depth, path);
 	if (!path) {
 		path = [];
 	}
@@ -39,7 +39,8 @@ function getPath(syntax, node, depth, path, container, idx) {
 		return;
 	}
 	if (objectsEqual(syntax, node)) {
-		return {"path":path, "container":container, "idx":idx};
+		return {"path":path.concat(node.type, FOLLOW),
+			"container":container, "idx":idx};
 	}
 	if (syntax.type) {
 		path = path.concat(syntax.type);
@@ -50,6 +51,7 @@ function getPath(syntax, node, depth, path, container, idx) {
 	if (syntax instanceof Array) {
 		for (var i = 0; i < syntax.length; i++) {
 			var item = syntax[i];
+			if (!item) continue;
 			var p = getPath(item, node, depth, path, syntax, i);
 			if (p) return p;
 			path.push(item.type, FOLLOW);
@@ -70,10 +72,13 @@ function setCurrentPath(path) {
 
 window.setCurrentPathToNode = function (node) {
 
-	// console.log("looking for", node, " in ",tree);
+	console.log("looking for", node, " in ",tree);
 	currentPosition = getPath(tree, node);
+	if (!currentPosition) {
+		console.log("tree:", JSON.stringify(tree), 'Node:', JSON.stringify(node));
+	}
 
-	// console.log("current position is ",currentPosition);
+	console.log("current position is ",currentPosition);
 }
 
 window.insertSnippet = function (node) {
@@ -84,20 +89,32 @@ window.insertSnippet = function (node) {
 	}
 	else
 	{
-		currentPosition.container.splice(currentPosition.idx+1, 0, node);
+		if (isNaN(currentPosition.idx)) {
+			currentPosition.container[currentPosition.idx] = node;
+		} else {
+			currentPosition.container.splice(currentPosition.idx+1, 0, node);
+		}
 	}
 }
 
 function generateProgramSource() {
 	console.log("**** generating snippet from path ",currentPosition.path);
 
-	var syntax = generate.generateNode(model, currentPosition.path, true);
-	var source = escodegen.generate(syntax, escodegenOptions);
+	var syntax = generate.generateNode(model, currentPosition.path, true, 2);
+	if (syntax.type == END) {
+		return;
+	}
+	var source;
+	try {
+		source = escodegen.generate(syntax, escodegenOptions);
+	} catch(e) {
+		console.log("generate", e);
+	}
 	return source;
 }
 
 window.getSnippets = function (num) {
-	return array(num).map(generateProgramSource);
+	return array(num).map(generateProgramSource).filter(Boolean);
 };
 
 window.getCurrentPosition = function () {

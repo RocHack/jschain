@@ -34,14 +34,30 @@ function checkKey(e)
 
 function isStatement(nodeType)
 {
-	return true;
+	return nodeType == "VariableDeclaration" ||
+		nodeType.match(/Statement$/);
+}
+
+var cursor;
+function addHandlers() {
+	$("#editor").on('click', '.statement', function(e) {
+		var el = $(this);
+		var node = el.data('node');
+		if (isStatement(node.type))
+		{
+			window.setCurrentPathToNode(node);
+			cursor.insertAfter(el);
+			newOptions();
+			e.stopPropagation();
+		}
+	});
 }
 
 function complete(option)
 {
 	console.log("generating from position ",window.getCurrentPosition());
 
-	var cursor = $('#cursor');
+	console.log("cursor");
 
 	var node = $($(option).children()[0]).data('node');
 	console.log("snippet = ",$($(option).children()[0])," node = ",node);
@@ -52,25 +68,10 @@ function complete(option)
 		window.setCurrentPathToNode(node);
 
 
-	var snippet = $($(option).html());
+	var snippet = $(option).children();
 	snippet.insertAfter(cursor);
 	$("<br>").insertAfter(cursor);
 	newOptions();
-
-	$(snippet).each(function() {
-		var node = $(this).data('node');
-		if (isStatement(node.type))
-		{
-			$(this).click(function() {
-				console.log(node);
-				window.setCurrentPathToNode(node);
-
-				cursor.insertAfter($(this));
-
-				newOptions();
-			});
-		}
-	});
 
 	cursor.insertAfter(snippet);
 }
@@ -101,5 +102,7 @@ function newOptions()
 }
 
 $(document).ready(function() {
+	cursor = $('#cursor');
+	addHandlers();
 	newOptions();
 });
