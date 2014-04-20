@@ -203,3 +203,4 @@ function instantiateNode(type, model, path)
 
 module.exports.generateProgram = generateProgram;
 module.exports.generateNode = generateNode;
+module.exports.generateList = generateList;
