@@ -40,6 +40,12 @@ function isStatement(nodeType)
 
 var cursor;
 function addHandlers() {
+	$('#options').on('click', 'pre', function() {
+		var options = $('#options').children();
+		$(options[currentSelection]).find('pre').css('background-color','clear');
+		currentSelection = $(this.parentNode).index();
+		$(options[currentSelection]).find('pre').css('background-color','#D7EBFC');
+	});
 	$("#editor").on('click', '.statement', function(e) {
 		var el = $(this);
 		var node = el.data('node');
