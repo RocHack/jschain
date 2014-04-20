@@ -25,7 +25,9 @@ window.registerNodeWithPath = function (node, path) {
 }
 
 window.registerNodeWithCurrentPath = function (node) {
-	console.log("registering "+node.type+" to "+currentPosition);
+	console.log("registering ");
+	console.log(node);
+	console.log(" to "+currentPosition);
 	astDomMap[node] = currentPosition;
 }
 
