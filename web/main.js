@@ -163,6 +163,13 @@ function generateProgramSource() {
 }
 
 window.getSnippets = function (num) {
+	if (currentPosition.path.length > 0)
+	{
+	    var path = currentPosition.path.slice(-(depth)*2);
+
+		$('h1').css('font-size','1.75em');
+		$('h1').text(path.join(", "))
+	}
 	console.log("path =",currentPosition.path);
 	return array(num).map(generateProgramSource).filter(Boolean);
 };
