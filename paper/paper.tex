@@ -7,6 +7,8 @@
 \usepackage{hyperref}
 \usepackage{listings}
 
+\hyphenation{ECMAScript JavaScript escodegen esprima}
+
 \lstset{
 	basicstyle=\footnotesize\ttfamily,
 }
@@ -181,7 +183,19 @@ that comprise our project.
 
 \subsection{Using the IDE}
 
-We can use the Guided IDE to generate programs.
+We can use the Guided IDE to generate programs. The programs look like actual
+programs but do not actually function unless the user is very careful about
+which snippets they pick. Crucially, the variable and identifier names that our
+system generates are not in general meaningful in the scope of the generated
+program.  Whereas with the vim autocompletions the identifiers would often be
+valid because because the corpus was the current file, with the larger corpus of
+the Guided IDE and writing a program from scratch, the user is less likely to
+find program snippets that use valid identifiers.
+
+This is a limitation of the current model, that identifier names are chosen
+probabilistically based on their position in the code, without regard to whether
+they are in scope and without refering to anything in another part of the
+program.
 
 \subsection{Limitations of the IDE}
 
