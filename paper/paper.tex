@@ -7,7 +7,7 @@
 \usepackage{float}
 \usepackage{hyperref}
 \usepackage{listings}
-\usepackage[margin=3cm]{geometry}
+\usepackage[margin=3.75cm]{geometry}
 
 %\usepackage{qtree}
 %\usepackage{tikz}
@@ -26,13 +26,8 @@ Probabilistic Programming
 }
 
 \author{
-	Carlos Diaz
-	\and
-	Dan Hassin
-	\and
-	Charles Lehner
-	\and
-	Dan Viterise
+	Carlos Diaz, Dan Hassin, Charles Lehner, Dan Viterise \\
+    \vspace{0pt}\\ Department of Computer Science \\University of Rochester
 }
 
 \date{April 21, 2014}
@@ -42,47 +37,50 @@ Probabilistic Programming
 \maketitle
 
 \begin{abstract}
-	We present Probabilistic Programming, a system for modeling abstract syntax
-	trees of programs with Markov chains, which we use to generate new programs.
-	We attempt to use this as an assistive device to guide programmers through
+	We present Probabilistic Programming, a system for generating JavaScript programs and code snippets based off a corpus of JavaScript source files.
+	In this paper, we will demonstrate storing statistical
+    data from non-linear structures (abstract syntax trees of programs) in a Markov model,
+    and of course using the model to generate new trees. We present a proof of concept for a web-based
+    assistive program editor that utilizes this technology to guide programmers through
 	constructing JavaScript programs.
 \end{abstract}
 
 \section{Introduction}
 
-\subsection{Motivation}
-
-For many people just starting out, programming can seem like a confusing and
-tedious activity. It can be unclear for many new programmers where they should
-begin and what should come next while coding. Without any proper guidance, a
-novice programmer is left on their own to scour thousands of pages online to
-discover what should come next in their code. Then, once a person becomes more
-adept at programming, he or she may notice that they are typing out the same or
-similar lines of code within each new program. This repetitiveness slows down
-the user and can make programming a much more tiresome task than it needs to be.
-These observations steered our group towards developing a way for someone to
-code with more instruction and productivity. The Probabilistic Programming
-method allows for a user to code in JavaScript using a web application. This web
-app provides a list of suggestions for the user's next line of code depending on
-where the user is in their program. Not only is this helpful for new programmers
-that need suggestions for what to write next in their code, this system allows
-for expert programmers to write code with more ease and efficiency.
+This paper will begin by discussing Markov chains and how we set out to use them for our goal. We will then describe in detail how we implemented a Markov chain for program syntax trees, how we were able to generate code using it, and finally we'll discuss our results and address the limitations of our product.
 
 \subsection{Markov chain}
 
-We chose to use a Markov chain to drive the code snippet generation, because
-(a) , and (b). A Markov Chain is a stochastic process
-that uses the current state and a set of probabilities to determine what state
-comes next. In the most simple case of a Markov Chain, the next action is based
-only upon the current situation and all other previous actions are forgotten.
-Thus, this process is essentially memoryless because all past states can be
-forgotten once a new state is reached. A good example of a Markov Chain is a
-random walk where at each integer value, the process chooses a new value such
-that the two possible values are the current value plus 1 and the current value
-minus 1. The transition probabilities for both of these options is .5. This is a
-good example of a Markov Chain because the next value on the random walk only
-depends on the current value in the walk; all previous values are not needed to
-choose the next value \cite{markov}.
+A Markov chain is a mathematical system that undergoes a stochastic process whereby
+the current state and a set of probabilities are used to determine what state
+to transition to next. In the most simple case of a Markov chain, the next action is based
+only upon the current state and all other previous actions are forgotten.
+Thus, this process is essentially ``memoryless'' because all past states can be
+forgotten once a new state is reached \cite{markov}. In this way, Markov chains can be likened
+to deterministic finite automata. So while they cannot remember a limitless amount of their history,
+calling them ``memoryless'' may be misleading, as they can indeed be implemented to remember a fixed
+size of their state history.
+
+Markov chains find application in many different fields. Familiar with Markov chains used for generating random human-sounding text (by training a model based on bigrams and trigrams of common speech), we were interested in perhaps more novel domains. We chose to use a Markov chain to drive code generation, because, like text, we feel that code can be personal and expressive, and the idea of generating code possibilities from a training set seemed like exciting research. It was also challenging -- since randomly generating code tokens would most likely produce syntactically invalid programs, we looked at program abstract syntax trees. And as the research developed, we found ourselves with a new vision of a semifeasable product.
+
+\subsection{Emerging goal}
+
+For many novice programmers, programming can seem like a confusing and
+tedious activity. It can be unclear for many new programmers where they should
+begin and what should come next while coding. They may conceptually understand
+what the next step should be, and yet be unable to express it with code. Or, they
+could be unsure of the right next step conceptually, and some code could inspire
+them to understand it.
+
+Even once one becomes more
+adept at programming, he or she may notice typing the same or
+similar lines of code in each new program. This repetitiveness slows down
+the user and can make programming more tiresome a task.
+
+The prospect of using a Markov chain to generate code snippets in an assistive, predictive, integrated development environment (IDE) for JavaScript seemed to be a natural progression from our research. Our final product, a Probabilistic Programming
+web application, allows a user to code in JavaScript by way of selecting from
+a list of suggestions for the user's next line of code. We imagine that this won't only be helpful for new programmers,
+but that this system would allow for expert programmers to write code with more ease and efficiency.
 
 % overview of markov chain
 
@@ -148,7 +146,7 @@ where \begin{align*}
 \sum\limits_{i = 0}^n P({newnode_i}) = 1.
 \end{align*}
 
-and ${Path}({node}_1, {edge}_1) = {node}_2$, ${Path}({node}_2, {edge}_2) = {node}_3$, ..., ${Path}({node}_d, {edge}_d) = {newnode}_k$, where ${newnode}_k$ is randomly selected from ${newnode}_1, ..., {newnode}_n$ given the probabilities \break $P({newnode_1}), ..., P({newnode_n})$. From this it can be seen that generating programs is simply a repetitive application of this function, where for the chosen ${newnode}_k$, we can generate each child of ${newnode}_k$ with the following formula. \begin{align*} &\forall {edge} \in {Features}({newnode}_k), \\
+\noindent and ${Path}({node}_1, {edge}_1) = {node}_2$, ${Path}({node}_2, {edge}_2) = {node}_3$, ..., ${Path}({node}_d, {edge}_d) = {newnode}_k$, where ${newnode}_k$ is randomly selected from ${newnode}_1, ..., {newnode}_n$ given the probabilities $P({newnode_1}), ..., P({newnode_n})$. From this it can be seen that generating programs is simply a repetitive application of this function, where for the chosen ${newnode}_k$, we can generate each child of ${newnode}_k$ with the following formula. \begin{align*} &\forall {edge} \in {Features}({newnode}_k), \\
 & \hspace{3em} {Path}({newnode}_k, {edge}) = f({node}_2, {edge}_2, ..., {node}_{d}, {edge}_{d}, {newnode}_k, {edge}).
 \end{align*}
 
@@ -202,6 +200,8 @@ type \emph{VariableDeclarator}.)
 \subsection{Generating code}
 
 Code can be generated rather easily using the approach explained in Section 2.2. The program tree is built up one node at a time, each one generated based on its unique AST path. The following algorithm demonstrates this process.
+
+\clearpage
 
 \begin{verbatim}
 procedure generateNode(model, path):
@@ -283,11 +283,11 @@ Programming.
 
 The Guided IDE offers users an environment for building a program entirely using
 our model, using program snippets generated at the cursor's context as building
-blocks. The editor presents a window for the program text, and and list of
+blocks. The editor presents a window for the program text, and a list of
 suggestion code snippets. The user can move a cursor through the code window at
 positions corresponding to boundaries of program nodes. As the user moves the
 cursor, the snippet suggestions are regenerated using the cursor's node path, to
-continuosly provide suggestions relevant to the current context of the program. When the
+continuously provide suggestions relevant to the current context of the program. When the
 user selects a suggestion snippet, its AST is inserted into the program's AST at
 the cursor's position in the tree, and the code window is redrawn. The user can
 move the cursor within newly inserted blocks, so that the program can grow
@@ -334,7 +334,7 @@ identifier names could be tedious.
 
 \subsubsection{Stubs}
 
-Instead of having a movable cursor in the code window, have stubs in the
+Instead of having a movable cursor in the code window, consider stubs in the
 program. Each stub would be a marker in place of an AST node. The user would
 select a stub and be given choices of snippets to replace it. Selecting a
 snippet would move the current snippet into the program in place of the selected
@@ -357,7 +357,7 @@ them to build the program in a certain way, with proper handling of identifiers,
 it may provide for an interesting or useful paradigm for interacting with a program
 source.
 
-\section{Conclusions \& Open Problems}
+\section{Conclusions}
 
 %Other applications of the model: genetic algorithms
 
@@ -366,22 +366,26 @@ source.
 Just as our approach of modeling a program with a tree-based Markov chain is a
 higher order model than a linear Markov chain of the program source code tokens,
 there may be applications of probabilistic modeling to higher-order
-representations of programs than the AST, such as a higher-order abstract syntax
-\cite{hosa}. Such an application may model the relationship between different
+representations of programs than the AST, such as a \emph{higher-order abstract syntax}, which promises to ``incorporate name binding information in a uniform and language generic way'' \cite{hosa}. Such an application may model the relationship between different
 parts of an AST, and handle scoping of variables to model identifiers
 abstractly.
 
 With a more sophisticated model of identifiers that could generate programs with
-identifiers in meaningful relation to eachother, Probabilistic Programming could
+identifiers in meaningful relation to each other, Probabilistic Programming could
 be used to generate semantically valid programs, for greater assistive,
 expressive, and programmatic power.
+
+\subsection{Future}
+
+We should 
 
 \subsection{Source}
 
 The source code for Probabilistic Programming is available online under an open
-source license:\\
-\url{https://github.com/RocHack/jschain}.\\
-The web IDE can be found here:
+source license:
+\url{https://github.com/RocHack/jschain}.
+
+The web IDE can be found at
 \url{https://csug.rochester.edu/u/clehner/jschain/web/}.
 
 \begin{thebibliography}{1}
