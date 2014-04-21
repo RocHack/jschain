@@ -83,6 +83,8 @@ function setCurrentPath(path) {
 
 window.setCurrentPathToNode = function (node) {
 
+	console.log("setting current path to node ",node);
+
 	if (node.type == "ExpressionStatement")
 		node = node.expression;
 
@@ -92,10 +94,13 @@ window.setCurrentPathToNode = function (node) {
 		console.log("tree:", JSON.stringify(tree), 'Node:', JSON.stringify(node));
 	}
 
-	// console.log("current position is ",currentPosition);
+	console.log("current position is ",currentPosition);
 }
 
 window.insertSnippet = function (node) {
+
+	console.log("inserting snippet", node);
+
 	if (!tree)
 	{
 		tree = node;
@@ -103,18 +108,21 @@ window.insertSnippet = function (node) {
 	}
 	else
 	{
-		if (isNaN(currentPosition.idx)) {
+		if (isNaN(currentPosition.idx)) 
+		{
 			currentPosition.container[currentPosition.idx] = node;
-			return true;
-		} else {
+		} 
+		else 
+		{
 			currentPosition.container.splice(currentPosition.idx+1, 0, node);
 		}
 	}
+
+	//console.log("generating tree", tree);
+	return escodegen.generate(tree, escodegenOptions);
 }
 
 function generateProgramSource() {
-	console.log("**** generating snippet from path ",currentPosition.path);
-
 	var syntax = generate.generateNode(model, currentPosition.path, true, depth);
 	if (!syntax || syntax.type == END) {
 		return;
@@ -129,9 +137,28 @@ function generateProgramSource() {
 }
 
 window.getSnippets = function (num) {
+	console.log("**** generating snippet from path ",currentPosition.path);
 	return array(num).map(generateProgramSource).filter(Boolean);
 };
 
 window.getCurrentPosition = function () {
 	return currentPosition;
+}
+
+
+window.deleteSnippet = function (node) {
+
+	console.log("deleting snippet", node);
+
+	if (isNaN(currentPosition.idx)) 
+	{
+		currentPosition.container[currentPosition.idx] = null;
+	} 
+	else
+	{
+		currentPosition.container.splice(currentPosition.idx, currentPosition.idx);
+	}
+
+	//console.log("generating tree", tree);
+	return escodegen.generate(tree, escodegenOptions);
 }

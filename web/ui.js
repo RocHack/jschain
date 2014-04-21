@@ -32,6 +32,13 @@ function checkKey(e)
 		// right arrow
 		moveCursor(true);
 	}
+	else if (e.keyCode == 8)
+	{
+		e.preventDefault();
+
+		// delete key
+		deleteKey();
+	}
     else if (e.keyCode == 38 || e.keyCode == 40)
     {
 	    $($('#options').children()[currentSelection]).find('pre').css('background-color','clear');
@@ -118,7 +125,7 @@ function moveCursor(forward) {
 	if (!from) {
 		// set it to the beginning
 	}
-	console.log("Found:", found, "elem", elem.innerText);
+	console.log("Found:", found, "elem", elem && elem.innerText);
 	if (!node) return;
 	window.setCurrentPathToNode(node);
 	cursor.insertAfter(elem);
@@ -133,58 +140,61 @@ function scrollIntoView(container, elem) {
 	}
 }
 
-function complete(option)
-{
-	var selectedLine = cursor.parent().text();
-	selectedLine = selectedLine.replace(/^\{\n/, "");
-	var spaces = "";
-	var numspaces = selectedLine.match(/^ */)[0].length;
-	if (numspaces == 1) numspaces = 0;
-	for (var i = 0; i < numspaces; i++)
-		spaces += " ";
-	console.log("line = ",selectedLine,"  spaces = ",numspaces);
-
-
-	// console.log("generating from position ",window.getCurrentPosition());
-
-	// console.log("cursor");
-
-	var node = $($(option).children()[0]).data('node');
-	console.log("snippet = ",$($(option).children()[0])," node = ",node);
-
-	var replaced = window.insertSnippet(node);
-
-
-	if (node.type != "Program")
-		window.setCurrentPathToNode(node);
-	
-	var snippet = $(option).children();
-
-	if (replaced)
-	{
-		cursor.prev().replaceWith(snippet);
-		snippet = null;
-	}
-	else
-	{
-		snippet.each(function () {
-			if (numspaces > 0)
-				//$(this).prepend($("<span>"+spaces+"</span>"));
-				$(this).css('padding-left','16px').css('display','inline-block');
-			$(this).insertAfter(cursor);
-		});
-		$("<br>").insertAfter(cursor);
-	}
-	
-	newOptions();
-
-	if (snippet)
-		cursor.insertAfter(snippet);
+function objectsEqual(a, b) {
+	return JSON.stringify(a) == JSON.stringify(b);
 }
 
-function moveCursorToPath(path)
+function findNode(span, node)
 {
+	span = $(span);
 
+	if (objectsEqual(span.data('node'), node))
+		return span;
+
+	var children = span.children();
+	for (var i = 0; i < children.length; i++)
+	{
+		var found = findNode(children[i], node);
+		if (found) return found;
+	}
+	return null;
+}
+
+function complete(option)
+{
+	var node = $($(option).children()[0]).data('node');
+	var newCode = window.insertSnippet(node);
+
+	$('#editor').html(newCode);
+
+	if (node.type != 'Program')
+		window.setCurrentPathToNode(node);
+
+	restoreCursor(node);
+
+	newOptions();
+}
+
+function restoreCursor(node)
+{
+	var cursorNode = findNode($('#editor'), node);
+	if (!cursorNode)
+		console.error("couldn't re-place cursor!");
+	else
+		cursor.insertAfter(cursorNode);
+}
+
+function deleteKey()
+{
+	var newCode = window.deleteSnippet(cursor.prev());
+
+	$('#editor').html(newCode);
+
+	window.setCurrentPathToNode(cursor.prev());
+
+	restoreCursor(cursor.prev());
+
+	newOptions();
 }
 
 function newOptions()
