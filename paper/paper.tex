@@ -4,6 +4,11 @@
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{hyperref}
+\usepackage{listings}
+
+\lstset{
+	basicstyle=\footnotesize\ttfamily,
+}
 
 \title{
 Probabilistic Programming
@@ -73,7 +78,25 @@ choose the next value \cite{markov}.
 
 \subsection{Modeling}
 
-Representation of programs in a markov model
+\subsubsection{AST}
+
+We work with programs at the level of abstract syntax tree (AST), using the
+syntax tree format of Mozilla's Parser API \cite{parser api}. We use
+esprima \cite{esprima}, an ECMAScript parser, to transform program source code into AST,
+and escodegen \cite{escodegen} (ECMAScript code generator) to transform ASTs into program source
+code.
+
+\subsubsection{Model}
+
+We encode the structure of an AST as a probabilistic model. The model is a data
+structure that maps node paths to probability distributions of node types or
+values. A node path is a list of node types and relationships that encodes the
+unique position of a node in a program's AST. The probability distribution for a
+node path is the set of possible node types or values that would appear in the
+syntax tree following the given path, and the respective probabilities of their
+occurance following the given path.
+
+%\lstinputlisting[caption=Scheduler, style=json]{../rand.js}
 
 Other applications of the model: genetic algorithms
 
@@ -99,11 +122,33 @@ Choosing valid identifiers, matching identifiers
 
 \section{Conclusions \& Open Problems}
 
+\clearpage
 \begin{thebibliography}{1}
 
+	\bibitem{esprima} Ariya Hidayat {\em Esprima}
+		URL = \url{http://esprima.org/}
+
 	\bibitem{markov} Takis Konstantopoulos {\em Introductory lecture notes on
-	Markov Chains and Random Walks} Uppsala University, URL = \url{http://www2.math.uu.se/~takis/L/McRw/mcrw.pdf}
- 
+		Markov Chains and Random Walks} Uppsala University,
+		URL = \url{http://www2.math.uu.se/~takis/L/McRw/mcrw.pdf}
+
+	\bibitem{escodegen} Yusuke Suzuki {\em Escodegen}
+		URL = \url{https://github.com/Constellation/escodegen}
+
+	\bibitem{parser api} Mozilla Developer Network {\em SpiderMonkey Parser API}
+		URL = \url{https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API}
+
 \end{thebibliography}
+
+\clearpage
+\section*{Appendix}
+
+\begin{figure}[h!]
+	\caption{model-sample.json}
+	\centering
+	A model generated from the program ``var x = 34"
+\end{figure}
+
+\lstinputlisting{model-sample.json}
 
 \end{document}
