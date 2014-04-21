@@ -126,8 +126,6 @@ The autocomplete snippets are generated as follows:
 \begin{enumerate}
 	\item Parse the contents of the current file into an AST.
 	\item Find the node path corresponding to the cursor by traversing the AST.
-		%This represents the program context at which the code snippets should
-		%be generated.
 	\item Generate programs starting from the node path of the cursor.
 	\item Present the programs to the user as code completion snippets.
 \end{enumerate}
@@ -177,8 +175,6 @@ that comprise our project.
   \caption{Screenshot of the web program editor GUI} \label{fig:screenshot}
 \end{figure}
 
-%Design decisions, HCI factors
-
 \section{Results}
 
 \subsection{Using the IDE}
@@ -192,7 +188,9 @@ valid because because the corpus was the current file, with the larger corpus of
 the Guided IDE and writing a program from scratch, the user is less likely to
 find program snippets that use valid identifiers.
 
-This is a limitation of the current model, that identifier names are chosen
+\subsection{Limitations of the model}
+
+It is a limitation of the current model that identifier names are chosen
 probabilistically based on their position in the code, without regard to whether
 they are in scope and without refering to anything in another part of the
 program. Because of this limitation, the Guided IDE is not useful for practical
@@ -234,33 +232,45 @@ them to build the program in a certain way, with proper handling of identifiers,
 it may provide for an interesting or useful paradigm for interacting with a program
 source.
 
-%\subsection{Limitations of the IDE}
+\section{Conclusions \& Open Problems}
 
-\subsection{Limitations of the model}
+%Other applications of the model: genetic algorithms
 
 \subsection{Extending the model}
 
-%Choosing valid identifiers, matching identifiers
+Just as our approach of modeling a program with a tree-based Markov chain is a
+higher order model than a linear Markov chain of the program source code tokens,
+there may be applications of probabilistic modeling to higher-order
+representations of programs than the AST, such as a higher-order abstract syntax
+\cite{hosa}. Such an application may model the relationship between different
+parts of an AST, and handle scoping of variables to model identifiers
+abstractly.
 
-\section{Conclusions \& Open Problems}
-
-Other applications of the model: genetic algorithms
+With a more sophisticated model of identifiers that could generate programs with
+identifiers in meaningful relation to eachother, Probabilistic Programming could
+be used to generate semantically valid programs, for greater assistive,
+expressive, and programatic power.
 
 \clearpage
 \begin{thebibliography}{1}
 
 	\bibitem{esprima} Ariya Hidayat {\em Esprima}
-		URL = \url{http://esprima.org/}
+		\\\url{http://esprima.org/}
 
 	\bibitem{markov} Takis Konstantopoulos {\em Introductory lecture notes on
-		Markov Chains and Random Walks} Uppsala University,
-		URL = \url{http://www2.math.uu.se/~takis/L/McRw/mcrw.pdf}
+		Markov Chains and Random Walks.} Uppsala University,
+		\\\url{http://www2.math.uu.se/~takis/L/McRw/mcrw.pdf}
+
+	\bibitem{hosa} Frank Pfenning, Conal Elliott
+		{\em Higher-Order Abstract Syntax.}
+		ACM SIGPLAN Notices. Vol. 23. No. 7. ACM, 1988.
+		\\\url{http://www.cs.cmu.edu/~fp/papers/pldi88.pdf}
 
 	\bibitem{escodegen} Yusuke Suzuki {\em Escodegen}
-		URL = \url{https://github.com/Constellation/escodegen}
+		\\\url{https://github.com/Constellation/escodegen}
 
 	\bibitem{parser api} Mozilla Developer Network {\em SpiderMonkey Parser API}
-		URL = \url{https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API}
+		\\\url{https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API}
 
 \end{thebibliography}
 
