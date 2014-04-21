@@ -1,0 +1,62 @@
+{
+    "_null": {
+        "_null": {
+            "_total": 1,
+            "Program": 1
+        }
+    },
+    "Program": {
+        "body": {
+            "_null": {
+                "_total": 1,
+                "VariableDeclaration": 1
+            },
+            "VariableDeclaration": {
+                "declarations": {
+                    "_total": 1,
+                    "VariableDeclarator": 1
+                },
+                "F": {
+                    "_total": 1,
+                    "_end": 1
+                }
+            }
+        }
+    },
+    "VariableDeclaration": {
+        "declarations": {
+            "VariableDeclarator": {
+                "init": {
+                    "_total": 1,
+                    "Literal": 1
+                },
+                "id": {
+                    "_total": 1,
+                    "Identifier": 1
+                },
+                "F": {
+                    "_total": 1,
+                    "_end": 1
+                }
+            }
+        }
+    },
+    "VariableDeclarator": {
+        "init": {
+            "Literal": {
+                "raw": {
+                    "34": 1,
+                    "_total": 1
+                }
+            }
+        },
+        "id": {
+            "Identifier": {
+                "name": {
+                    "_total": 1,
+                    "x": 1
+                }
+            }
+        }
+    }
+}
