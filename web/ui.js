@@ -74,7 +74,7 @@ function addHandlers() {
 	});
 	editor.on('click', '.statement', function(e) {
 		var el = $(this);
-		var node = el.data('node');
+		var node = window.getNodeById(el.data('node-id'));
 		if (isStatement(node.type))
 		{
 			window.setCurrentPathToNode(node);
@@ -98,7 +98,7 @@ function moveCursor(forward) {
 	// find the next/previous statement
 	var node, elem, found;
 	function findStatement(i, el) {
-		var n = $(el).data('node');
+		var n = window.getNodeById($(el).data('node-id'));
 		console.log("NODE!", n, el.innerText);
 		if (n) {
 			console.log("go to children");
@@ -148,7 +148,7 @@ function findNode(span, node)
 {
 	span = $(span);
 
-	if (objectsEqual(span.data('node'), node))
+	if (window.getNodeById(span.data('node-id')) == node)
 		return span;
 
 	var children = span.children();
@@ -162,7 +162,7 @@ function findNode(span, node)
 
 function complete(option)
 {
-	var node = $($(option).children()[0]).data('node');
+	var node = window.getNodeById($($(option).children()[0]).data('node-id'));
 	var newCode = window.insertSnippet(node);
 
 	$('#editor').html(newCode);

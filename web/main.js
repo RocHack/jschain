@@ -32,6 +32,20 @@ function objectsEqual(a, b) {
 	return JSON.stringify(a) == JSON.stringify(b);
 }
 
+function walkSyntax(syntax, fn) {
+	if (!syntax || typeof syntax != "object") {
+		return;
+	}
+	if (syntax.type) {
+		fn(syntax);
+	}
+	for (var key in syntax) {
+		if (key != "type" && hasOwnProp(syntax, key)) {
+			walkSyntax(syntax[key], fn);
+		}
+	}
+}
+
 var FOLLOW = "F";
 // looking for node in syntax
 function getPath(syntax, node, depth, path, container, idx) {
@@ -122,11 +136,27 @@ window.insertSnippet = function (node) {
 	return escodegen.generate(tree, escodegenOptions);
 }
 
+var maxId = 0;
+var nodesById = {};
+function labelNodeId(node) {
+	node.idX = ++maxId;
+	nodesById[node.idX] = node;
+}
+
+window.getNodeById = function (id) {
+	var node = nodesById[id];
+	if (!node) {
+		console.log("no node found with id", id);
+	}
+	return node;
+};
+
 function generateProgramSource() {
 	var syntax = generate.generateNode(model, currentPosition.path, true, depth);
 	if (!syntax || syntax.type == END) {
 		return;
 	}
+	walkSyntax(syntax, labelNodeId);
 	var source;
 	try {
 		source = escodegen.generate(syntax, escodegenOptions);
@@ -143,8 +173,7 @@ window.getSnippets = function (num) {
 
 window.getCurrentPosition = function () {
 	return currentPosition;
-}
-
+};
 
 window.deleteSnippet = function (node) {
 
