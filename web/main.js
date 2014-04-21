@@ -28,10 +28,6 @@ function array(length) {
 
 var hasOwnProp = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 
-function objectsEqual(a, b) {
-	return JSON.stringify(a) == JSON.stringify(b);
-}
-
 function walkSyntax(syntax, fn) {
 	if (!syntax || typeof syntax != "object") {
 		return;
@@ -58,7 +54,7 @@ function getPath(syntax, node, depth, path, container, idx) {
 	if (syntax.type == "ExpressionStatement")
 		syntax = syntax.expression;
 
-	if (objectsEqual(syntax, node)) {
+	if (syntax == node) {
 		if (path[path.length-1] == FOLLOW || path[path.length-1] == 'body')
 			path = path.concat(node.type, FOLLOW)
 		return {"path":path, "container":container, "idx":idx};
