@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{graphicx}
+\usepackage{subcaption}
 \usepackage{float}
 \usepackage{hyperref}
 \usepackage{listings}
@@ -70,7 +71,7 @@ that the two possible values are the current value plus 1 and the current value
 minus 1. The transition probabilities for both of these options is .5. This is a
 good example of a Markov Chain because the next value on the random walk only
 depends on the current value in the walk; all previous values are not needed to
-choose the next value \cite{markov}. 
+choose the next value \cite{markov}.
 
 % application of markov chain to abstact syntrax tree
 
@@ -96,15 +97,70 @@ node path is the set of possible node types or values that would appear in the
 syntax tree following the given path, and the respective probabilities of their
 occurrence following the given path.
 
+The model is implemented as a JSON object where the path is indexed into the
+object by successively indexing by each string of the path.
+
+See figure~\ref{fig:sample-model} in the appendix for a model for the program
+``var x = 34;".
+
 %\lstinputlisting[caption=Scheduler, style=json]{../rand.js}
 
 Other applications of the model: genetic algorithms
 
 \subsection{Application}
 
-The vim autocomplete script
+\subsubsection{vim autocomplete script}
 
-The guided IDE
+We integrated our model into the text editor vim to offer autocompletion
+suggestions of programs upon the user's request, using vim's
+\texttt{completefunc} feature. When the user is editing a JS file in vim with
+this feature, they may press a keyboard command to get a list of program
+snippets to choose from. The snippets are generated in the context of the
+program path at cursor's position. The user may pick one of the snippet
+suggestions to have it inserted into their code at their cursor.
+
+The autocomplete snippets are generated as follows:
+\begin{enumerate}
+	\item Parse the contents of the current file into an AST.
+	\item Find the node path corresponding to the cursor by traversing the AST.
+		%This represents the program context at which the code snippets should
+		%be generated.
+	\item Generate programs starting from the node path of the cursor.
+	\item Present the programs to the user as code completion snippets.
+\end{enumerate}
+
+The vim autocomplete feature is limited to generating full programs on a single
+line, and requires explicitly triggering the \texttt{completefunc} feature for
+code snippets.
+
+\begin{figure}[h]
+	\centering
+	\begin{tabular}{c c}
+
+		\begin{subfigure}[h]{6.25cm}
+			\centering
+			\includegraphics[width=1.00\textwidth]{vim1}
+			\caption{Inserting a for loop} \label{fig:vim1}
+		\end{subfigure}
+
+		\begin{subfigure}[h]{6cm}
+			\centering
+			\includegraphics[width=1.00\textwidth]{vim2}
+			\caption{Inserting an object property} \label{fig:vim2}
+		\end{subfigure}
+	\end{tabular}
+
+	\caption{Screenshots of vim using autocomplete}
+\end{figure}
+
+
+\subsubsection{Guided IDE}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.90\textwidth]{screenshot}
+  \caption{Screenshot of the web program editor GUI} \label{fig:screenshot}
+\end{figure}
 
 Design decisions, HCI factors
 
@@ -145,8 +201,9 @@ Choosing valid identifiers, matching identifiers
 
 \begin{figure}[h!]
 	\caption{model-sample.json}
+	\label{fig:sample-model}
 	\centering
-	A model generated from the program ``var x = 34"
+	A model generated from the program ``var x = 34;"
 \end{figure}
 
 \lstinputlisting{model-sample.json}
