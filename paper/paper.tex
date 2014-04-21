@@ -82,7 +82,7 @@ choose the next value \cite{markov}.
 
 We work with programs at the level of abstract syntax tree (AST), using the
 syntax tree format of Mozilla's Parser API \cite{parser api}. We use
-esprima \cite{esprima}, an ECMAScript parser, to transform program source code into AST,
+esprima \cite{esprima}, an ECMAScript parser, to transform program source code into an AST,
 and escodegen \cite{escodegen} (ECMAScript code generator) to transform ASTs into program source
 code.
 
@@ -94,7 +94,7 @@ values. A node path is a list of node types and relationships that encodes the
 unique position of a node in a program's AST. The probability distribution for a
 node path is the set of possible node types or values that would appear in the
 syntax tree following the given path, and the respective probabilities of their
-occurance following the given path.
+occurrence following the given path.
 
 %\lstinputlisting[caption=Scheduler, style=json]{../rand.js}
 
