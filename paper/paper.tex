@@ -1,10 +1,18 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
-\usepackage{amsmath}
+\usepackage{amsmath}   
+\usepackage{mathtools}
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{hyperref}
 \usepackage{listings}
+
+
+\usepackage{qtree}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+
+\usepackage[]{algorithm2e}
 
 \lstset{
 	basicstyle=\footnotesize\ttfamily,
@@ -33,12 +41,15 @@ Probabilistic Programming
 
 \begin{abstract}
 	We present Probabilistic Programming, a system for modeling abstract syntax
-	trees of programs with markov chains, which we use to generate new programs.
+	trees of programs with Markov chains, which we use to generate new programs.
 	We attempt to use this as an assistive device to guide programmers through
 	constructing JavaScript programs.
 \end{abstract}
 
 \section{Introduction}
+
+\subsection{Motivation}
+
 For many people just starting out, programming can seem like a confusing and
 tedious activity. It can be unclear for many new programmers where they should
 begin and what should come next while coding. Without any proper guidance, a
@@ -55,11 +66,10 @@ where the user is in their program. Not only is this helpful for new programmers
 that need suggestions for what to write next in their code, this system allows
 for expert programmers to write code with more ease and efficiency.
 
-\subsection{Motivation}
+\subsection{Markov chain}
 
-% overview of markov chain
-A primary motivation for undertaking this project was trying to find a new and
-interesting way to apply a Markov Chain.  A Markov Chain is a stochastic process
+We chose to use a Markov chain to drive the code snippet generation, because
+(a) , and (b). A Markov Chain is a stochastic process
 that uses the current state and a set of probabilities to determine what state
 comes next. In the most simple case of a Markov Chain, the next action is based
 only upon the current situation and all other previous actions are forgotten.
@@ -72,35 +82,142 @@ good example of a Markov Chain because the next value on the random walk only
 depends on the current value in the walk; all previous values are not needed to
 choose the next value \cite{markov}. 
 
-% application of markov chain to abstact syntrax tree
+% overview of markov chain
 
-\section{Implementation}
+\section{Tree-based Markov chain}
 
-\subsection{Modeling}
+\subsection{Abstract syntax trees}
 
-\subsubsection{AST}
+An abstract syntax tree (AST) is a tree-based, rather than text-based, representation of a program.
+Such a tree is generated using the grammar rules of a programming language and text input. In the tree, \emph{nodes}
+are language control structures such as {\tt for} loops, {\tt if} statements, variable and function
+declarations, and so on. The \emph{edges} connecting a parent node to its children represent the different \emph{features}
+of that node. For instance, a {\tt for} loop would have the features \emph{init} (e.g. {\tt var i = 0;}),
+\emph{test} (e.g. {\tt i < array.length;}), \emph{update} (e.g. {\tt i++}), and a \emph{body} (a list
+of statements that should be executed per loop iteration). To implement lists, we include the additional
+\emph{follow} edge as a feature to all statements, which would connect a statement node to the next statement
+in the list. If the statement is last in its container list, we connect its \emph{follow} edge to a special
+{\tt {\_end}} node.
 
-We work with programs at the level of abstract syntax tree (AST), using the
-syntax tree format of Mozilla's Parser API \cite{parser api}. We use
-esprima \cite{esprima}, an ECMAScript parser, to transform program source code into AST,
-and escodegen \cite{escodegen} (ECMAScript code generator) to transform ASTs into program source
-code.
+\begin{center}
 
-\subsubsection{Model}
+[example of AST here]
 
-We encode the structure of an AST as a probabilistic model. The model is a data
-structure that maps node paths to probability distributions of node types or
-values. A node path is a list of node types and relationships that encodes the
-unique position of a node in a program's AST. The probability distribution for a
-node path is the set of possible node types or values that would appear in the
+% \begin{tikzpicture}[level distance=1.5cm,
+% level 1/.style={sibling distance=3.5cm},
+% level 2/.style={sibling distance=1cm}]
+
+% \node (Root) {Program}
+% child {
+%     node {for} edge from parent node[draw=none] {\emph{body}}
+%     child { node {VD} edge from parent node[draw=none] {\emph{init}} }
+% };
+
+% \end{tikzpicture}
+
+\end{center}
+
+Our system deals with programs at the level of AST's as they provide more structure and modularity than text.
+We use the syntax tree format of Mozilla's Parser API \cite{parser api}, and \emph{esprima} \cite{esprima}, an ECMAScript
+parser, to transform program source code into an AST of this format.
+
+%escodegen \cite{escodegen} (ECMAScript code generator) to transform ASTs into program source code.
+
+\subsection{Our Markov chain}
+
+To build our Markov chain structure, we parse a corpus of JavaScript files into their
+respective AST's, and then collect statistics from these trees to build our Markov model. 
+
+The model maps AST paths to the probability distributions of node types or values for that given
+path. An AST path is a list of items alternating between a node type and one of its features, thus encoding the unique position of a 
+specific node in the AST. The probability distribution for an AST path is the set of possible node types or values that would appear in the
 syntax tree following the given path, and the respective probabilities of their
 occurance following the given path.
+
+More formally, given a depth $d$ (indicating how many nodes we should backtrace) for a given
+${node}_d$ and feature ${edge}_d$, the generation of ${node}_d$'s child node given by the
+transition ${edge}_d$, can be expressed by the following function $f$,
+
+\begin{align*}
+f({node}_1, {edge}_1, ..., {node}_{d}, {edge}_{d}) = \begin{dcases*}
+		{newnode_1},	&	$P({newnode_1})$ \\
+		{newnode_2},	&	$P({newnode_2})$ \\
+		...\\
+		{newnode_n},    &   $P({newnode_n})$ \\
+	\end{dcases*}
+\end{align*}
+
+such that ${Path}({node}_1, {edge}_1) = {node}_2$, ${Path}({node}_2, {edge}_2) = {node}_3$, ..., and ${Path}({node}_d, {edge}_d) = {newnode}_k$, where ${newnode}_k$ is randomly selected from ${newnode}_1, ..., {newnode}_k$ given the probabilities $P({newnode_1}), ..., P({newnode_n})$, and
+
+\begin{align*}
+\sum\limits_{i = 0}^n P({newnode_i}) = 1.
+\end{align*}
+
+From this it can be seen that generating programs is simply a repetitive application of this function, where for the chosen ${newnode}_k$, we can generate each child of ${newnode}_k$ with, $\forall {edge} \in {Features}({newnode}_k)$,
+
+\begin{align*}
+{Path}({newnode}_k, {edge}) = f({node}_2, {edge}_2, ..., {node}_{d}, {edge}_{d}, {newnode}_k, {edge}).
+\end{align*}
+
+This process will eventually terminate as the probability of generating {\tt \_end} nodes for a \emph{follow} edge will always be non-zero -- as the programs we parse into our corpus are surely finite -- and such nodes have no features to be ``expanded.''
+
+\subsection{Implementation}
+
+\subsubsection{Data structure}
+
+Building the Markov chain model means being able to provide the probability distribution of new nodes for arbitrary input,
+as described by the function in Section 2.2. To do this, we constructed a data structure using JavaScript Object Notation (JSON),
+a structural format useful for ease of specification and integration with JavaScript programs.
+
+The data structure is a hash table (also commonly called a map, dictionary, or associative array), that, on a given input, returns another hash table for paths that begin with that input. This behavior is repeated until the number of inputs reaches the desired depth, at which point a final hash table, mapping the node type to its probability distribution is returned. This, in effect, is modularizing the function $f$ described above, so that, say for ${depth} = 2$,
+
+\begin{align*}
+lookup(lookup(lookup(lookup({hash}, {node}_1), {edge}_1), {node}_2), {edge}_2) = \textbf{P}({nodes}).
+\end{align*}
+
+\subsubsection{Building the model}
+
+We first obtain collection of JavaScript programs in AST form. We then run the following algorithm to construct our model:
+
+\begin{verbatim}
+procedure addToModel(node, path):
+    model = corpusModel
+    for each elem in path[path.length-depth*2 .. path.length]:
+        model = model[elem]
+    model[node.type] += 1
+    model[_total] += 1
+    for each feature of node:
+        temp_path = path + [node.type, feature]
+        if node.feature is list of nodes:
+            for each item in node.feature:
+                addToModel(item, temp_path)
+                temp_path += [item.type, "FOLLOW"]
+            addToModel(END_NODE, temp_path)
+        else:
+            addToModel(node.feature, temp_path)
+
+for each parsed AST:
+    addToModel(AST.root, [])
+\end{verbatim}
+
+For each AST, we walk through every node in the tree by recursively exploring each feature\footnote{While we use \emph{follow} as if it were a feature edge, programs encoded in the AST's we parse use arrays of nodes (rather than linked-lists as we represent them) for a collection of statements. The given pseudocode demonstrates how we can transform an array into a linear sequence of edges.} of each node. In each call to explore a node's feature, we maintain the path up until that node by appending to it the node type and the name of the feature to reach the wanted child. We trim the beginning of the path off so that the length of the path is appropriate with respect to the chosen depth (i.e. so that $|path| = 2*d$)\footnote{Note that this requires that the path is at least of length $2*depth$. If the path is shorter than this, it represents not having at least $d$ levels of context. This can occur, say, for the first statement in the entire program, where there are no preceding nodes in its AST path. For these cases, we add the ``{\tt \_null}'' feature until we reach the desired depth (omitted in the pseudocode.)}, create that path through the layers of hash tables, if it doesn't already exist, add the node type to the probability distribution if it isn't already, and then increment a counter associated with that node type. We also increment a ``{\tt \_total}'' counter for the convenience of the generator program.
+
+When this process is complete, the JSON object is saved to a file and can be augmented by more code samples thereafter. (An example of such a model is shown in the Appendix.)
+
+\subsection{Generating code}
+
+\subsubsection{Random programs}
+
+\subsubsection{Snippets}
+
+
+% application of markov chain to abstact syntrax tree
 
 %\lstinputlisting[caption=Scheduler, style=json]{../rand.js}
 
 Other applications of the model: genetic algorithms
 
-\subsection{Application}
+\section{Applications}
 
 The vim autocomplete script
 
