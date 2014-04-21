@@ -232,7 +232,7 @@ To generate random programs, we always begin with a ``Program'' node, and then a
 
 Naturally, identifiers and literals are a very large part of programming. Without them, code would be entirely unspecific, and would only consist of syntactic symbols and keywords. Yet they pose an issue with code generation, as we found generating identifiers or literals that are likely to be what the user is expecting an especially difficult problem to solve, let alone model. Struggling to come up with a simple, intelligent, and robust solution, and short on time, we fell back to using our existing Markov approach.
 
-In the current implementation of this system, following the paths [\emph{Identifier}, \emph{Name}], or [\emph{Literal}, \emph{Raw}] result not in node types, but rather in the text of the identifier names or literal values. This way, generating identifiers and literals is simply a probabilistic process like the rest of the code generation. Of course, this means that sometimes identifiers are added that are not in scope, that have mismatched types, or that simply make no semantic sense. (But adjusting $depth$ did seem to make programs more meaningful, expectedly. This can be seen experimentally on our web IDE, explained in Section 4.1.)
+In the current implementation of this system, following the paths [\emph{Identifier}, \emph{Name}], or [\emph{Literal}, \emph{Raw}] result not in node types, but rather in the text of the identifier names or literal values. This way, generating identifiers and literals is simply a probabilistic process like the rest of the code generation. Of course, this means that sometimes identifiers are added that are not in scope, that have mismatched types, or that simply make no semantic sense. (But adjusting $depth$ did seem to make programs more meaningful, as expected. This can be seen experimentally by modifying depth on our web IDE, which explained in Section 4.1.)
 
 %\lstinputlisting[caption=Scheduler, style=json]{../rand.js}
 
@@ -296,7 +296,7 @@ that comprise our project.
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=1.00\textwidth]{screenshot}
+  \includegraphics[width=1.00\textwidth]{ide}
   \caption{Screenshot of the web program editor GUI} \label{fig:screenshot}
 \end{figure}
 
