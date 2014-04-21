@@ -17,6 +17,7 @@ var depth;
 var model;
 
 window.setDepth = function (d) {
+	console.log("switching to depth",d);
 	depth = d;
 	model = window.corpusModel[d];
 }

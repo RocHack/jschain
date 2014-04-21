@@ -4,6 +4,7 @@
 	<link rel="stylesheet" type="text/css" href="style.css">
 	<link rel="stylesheet" type="text/css" href="bootstrap.min.css">
 	<script type="text/javascript" src="jquery-2.1.0.min.js"></script>
+	<script type="text/javascript" src="bootstrap.min.js"></script>
 	<script type="text/javascript" src="corpus-model.js"></script>
 	<script type="text/javascript" src="bundle.js"></script>
 	<script type="text/javascript" src="ui.js"></script>
@@ -21,7 +22,19 @@
 			<pre id="output"></pre>
 		</div>
 		<div class="col-md-4">
-			<h3  style="margin-top:0px; padding-bottom:5px;">Suggestions</h3>
+			<div class="btn-group" id="depth-menu">
+				<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+					Depth <span id="current-depth">4</span> <span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu" role="menu">
+					<li><a href="#" onclick="selectDepth(this);">2</a></li>
+					<li><a href="#" onclick="selectDepth(this);">3</a></li>
+					<li><a href="#" onclick="selectDepth(this);">4</a></li>
+					<li><a href="#" onclick="selectDepth(this);">5</a></li>
+					<li><a href="#" onclick="selectDepth(this);">6</a></li>
+				</ul>
+			</div>
+			<h3 class="suggestions">Suggestions</h3>
 			<ul id="options" class="nav nav-pills nav-stacked">
 			</ul>
 		</div>

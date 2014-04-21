@@ -27,6 +27,18 @@ body
 	border-radius: 3px;
 }
 
+#depth-menu
+{
+	float: right;
+	display: inline-block;
+}
+
+.suggestions
+{
+	margin-top:0px;
+	padding-bottom:5px;
+}
+
 
 pre < .statement
 {

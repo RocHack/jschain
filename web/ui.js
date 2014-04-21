@@ -134,6 +134,17 @@ function moveCursor(forward) {
 	newOptions();
 }
 
+function selectDepth(li) {
+	var depth = $(li).text();
+	if (depth == $('#current-depth').html())
+		return;
+
+	$('#current-depth').html(depth);
+	window.setDepth(+depth);
+
+	newOptions();
+}
+
 function scrollIntoView(container, elem) {
 	var offset = cursor.offset().top - editor.offset().top;
 	if (offset < 0 || offset > container.height()) {
@@ -232,6 +243,8 @@ $(document).ready(function() {
 	cursor = $('#cursor');
 	addHandlers();
 	newOptions();
+
+	$('.dropdown-menu').dropdown();
 
 	$('#output').hide();
 	$(".run-btn").click(function () {
