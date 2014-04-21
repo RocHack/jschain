@@ -324,6 +324,8 @@ similar model.
 
 \subsection{Alternative approaches for the IDE}
 
+We explored several other approaches that could solve the issue of identifiers and literals.
+
 \subsubsection{Prompt for identifiers}
 
 Rather than picking identifier names from the model, use placeholder identifiers
@@ -357,11 +359,19 @@ them to build the program in a certain way, with proper handling of identifiers,
 it may provide for an interesting or useful paradigm for interacting with a program
 source.
 
-\section{Conclusions}
+\subsubsection{Secondary models for identifiers}
 
-%Other applications of the model: genetic algorithms
+When generating identifiers, we were interested in generating meaningful ones rather than random ones (whose weights were calculated from counts originating from identifiers that could be in entirely different places of the program.) We wanted to design a model that could keep track of when the same variables were used in the same (or similar) place.
 
-\subsection{Extending the model}
+One idea was to, during the parse, keep track of the path at which each variable identifier was used, grouped by the identifier name. When an identifier needs to be generated, we can find that path in our secondary model, and if so, bind to a random (but weighted) identifier that has been used at that path, with the weight being based on the frequency of that identifier appearing at that path. For subsequent statements that need identifiers, the same process could occur, and, if the same variable group was chosen, it could generate the variable name that was bound to the first statement.
+
+Another idea also involved constructing a secondary model during the parse, that kept track of statements that used the same identifier. When such statements are found, it would compute the path between those statements and increment a counter associated that path. This would represent the likelihood of two nodes connected by that path using the same identifier. Then, during code generation, whenever an identifier is needed, the generator would make a list of all variables in scope at that point, and compute the path from the variable declaration (and/or last use) to the node being generated. It would look up each path in the secondary model and assign each of the in-scope variables a weight. A variable could then be chosen based on this probability.
+
+We suspect that this may affect the complexity of our algorithms significantly. If what the system is doing now is analogous to the behavior of a context-free grammar (i.e. by recursively generating nodes), having detection of bound (same) identifiers across nodes would involve pattern-matching and, perhaps even analogy-solving, could be considered more of an action of a Turing machine. This could mean the complexity of the process could be unbounded.
+
+Unfortunately, we were unable to implement these ideas or explore them further due to time constraints.
+
+\subsubsection{Extending the model}
 
 Just as our approach of modeling a program with a tree-based Markov chain is a
 higher order model than a linear Markov chain of the program source code tokens,
@@ -375,18 +385,22 @@ identifiers in meaningful relation to each other, Probabilistic Programming coul
 be used to generate semantically valid programs, for greater assistive,
 expressive, and programmatic power.
 
-\subsection{Future}
+\section{Conclusions}
 
-We should 
+We consider the web IDE a strong proof of concept for context-based code snippet generation. We are aware of some of its serious structural limitations, but we are confident that related concepts, such as genetic algorithms, might be possible. Specifically, we are interested in the possibility of creating genetic algorithms that take advantage of this platform to build and ``evolve'' code in a similar process. Perhaps it could even be given a purpose; for instance, to satisfy a set of given test cases.
 
-\subsection{Source}
+%Other applications of the model: genetic algorithms
+
+\subsection*{Source \& Demo}
 
 The source code for Probabilistic Programming is available online under an open
 source license:
-\url{https://github.com/RocHack/jschain}.
+\url{https://github.com/RocHack/jschain}.\\
 
-The web IDE can be found at
+\noindent The web IDE can be found at
 \url{https://csug.rochester.edu/u/clehner/jschain/web/}.
+
+\clearpage
 
 \begin{thebibliography}{1}
 
