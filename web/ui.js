@@ -14,7 +14,8 @@ function checkKey(e)
     if (e.keyCode == 13)
     {
 		//enter key
-    	complete(selectedDiv);
+		if (numSelections > 0)
+	    	complete(selectedDiv);
     }
 	else if (e.keyCode == 32)
 	{
@@ -48,7 +49,7 @@ function checkKey(e)
 	        // up arrow
 			currentSelection -= 1;
 	    }
-	    else if (e.keyCode == 40 && currentSelection < numSelections-1)
+	    else if (e.keyCode == 40 && currentSelection < numSelections)
 	    {
 	        // down arrow
 	    	currentSelection += 1;

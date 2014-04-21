@@ -148,13 +148,14 @@ window.getNodeById = function (id) {
 };
 
 function generateProgramSource() {
-	var syntax = generate.generateNode(model, currentPosition.path, true, depth);
-	if (!syntax || syntax.type == END) {
-		return;
-	}
-	walkSyntax(syntax, labelNodeId);
 	var source;
 	try {
+		var syntax = generate.generateNode(model, currentPosition.path, true, depth);
+		if (!syntax || syntax.type == END) {
+			return;
+		}
+		walkSyntax(syntax, labelNodeId);
+		
 		source = escodegen.generate(syntax, escodegenOptions);
 	} catch(e) {
 		console.error("generate", e);
