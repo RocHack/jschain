@@ -3,16 +3,17 @@
 \usepackage{amsmath}   
 \usepackage{mathtools}
 \usepackage{graphicx}
+\usepackage{subcaption}
 \usepackage{float}
 \usepackage{hyperref}
 \usepackage{listings}
-
 
 \usepackage{qtree}
 \usepackage{tikz}
 \usepackage{tikz-qtree}
 
 \usepackage[]{algorithm2e}
+\hyphenation{ECMAScript JavaScript escodegen esprima}
 
 \lstset{
 	basicstyle=\footnotesize\ttfamily,
@@ -80,7 +81,7 @@ that the two possible values are the current value plus 1 and the current value
 minus 1. The transition probabilities for both of these options is .5. This is a
 good example of a Markov Chain because the next value on the random walk only
 depends on the current value in the walk; all previous values are not needed to
-choose the next value \cite{markov}. 
+choose the next value \cite{markov}.
 
 % overview of markov chain
 
@@ -100,6 +101,7 @@ in the list. If the statement is last in its container list, we connect its \emp
 {\tt {\_end}} node.
 
 \begin{center}
+
 
 [example of AST here]
 
@@ -196,6 +198,17 @@ For each AST, we walk through every node in the tree by recursively exploring ea
 
 When this process is complete, the JSON object is saved to a file and can be augmented by more code samples thereafter. (An example of such a model is shown in the Appendix.)
 
+See figure~\ref{fig:sample-model} in the appendix for a model for the program
+``var x = 34;" In this model we see for example that the path
+\texttt{[Program, body, VariableDeclaration, declarations]} leads to
+\texttt{VariableDeclarator} with probability 1. This indicates that a Program
+node whose body is a VariableDeclaration always has a declaration that is of
+type VariableDeclarator.
+
+The model is implemented as a JSON object where the path is indexed into the
+object by successively indexing by each string of the path.
+
+
 \subsection{Generating code}
 
 \subsubsection{Random programs}
@@ -209,45 +222,165 @@ Random programs can be generated rather easily using the approach explained in S
 
 %\lstinputlisting[caption=Scheduler, style=json]{../rand.js}
 
-Other applications of the model: genetic algorithms
-
 \section{Applications}
 
-The vim autocomplete script
+\subsection{vim autocomplete script}
 
-The guided IDE
+We integrated our model into the text editor vim to offer autocompletion
+suggestions of programs upon the user's request, using vim's
+\texttt{completefunc} feature. When the user is editing a JS file in vim with
+this feature, they may press a keyboard command to get a list of program
+snippets to choose from. The snippets are generated in the context of the
+program path at cursor's position. The user may pick one of the snippet
+suggestions to have it inserted into their code at their cursor.
 
-Design decisions, HCI factors
+The autocomplete snippets are generated as follows:
+\begin{enumerate}
+	\item Parse the contents of the current file into an AST.
+	\item Find the node path corresponding to the cursor by traversing the AST.
+	\item Generate programs starting from the node path of the cursor.
+	\item Present the programs to the user as code completion snippets.
+\end{enumerate}
+
+\begin{figure}[ht]
+	\centering
+	\begin{tabular}{c c}
+		\begin{subfigure}[h]{6.25cm}
+			\centering
+			\includegraphics[width=1.00\textwidth]{vim1}
+			\caption{Inserting a for loop} \label{fig:vim1}
+		\end{subfigure}
+		\begin{subfigure}[h]{6cm}
+			\centering
+			\includegraphics[width=1.00\textwidth]{vim2}
+			\caption{Inserting an object property} \label{fig:vim2}
+		\end{subfigure}
+	\end{tabular}
+	\caption{Screenshots of vim using autocomplete of programs}
+\end{figure}
+
+The vim autocomplete feature is limited to inserting program snippets on a single
+line, and requires the user to explicitly trigger the \texttt{completefunc}
+feature to be prompted with code snippets. To further explore using our model
+for editing, we created a web-based editor that more deeply integrates Probabilistic
+Programming.
+
+\subsection{Guided IDE}
+
+The Guided IDE offers users an environment for building a program entirely using
+our model, using program snippets generated at the cursor's context as building
+blocks. The editor presents a window for the program text, and and list of
+suggestion code snippets. The user can move a cursor through the code window at
+positions corresponding to boundaries of program nodes. As the user moves the
+cursor, the snippet suggestions are regenerated using the cursor's node path, to
+continuosly provide suggestions relevant to the current context of the program. When the
+user selects a suggestion snippet, its AST is inserted into the program's AST at
+the cursor's position in the tree, and the code window is redrawn. The user can
+move the cursor within newly inserted blocks, so that the program can grow
+deeper. The initial corpus for the IDE's model consists of the JavaScript files
+that comprise our project.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=1.00\textwidth]{screenshot}
+  \caption{Screenshot of the web program editor GUI} \label{fig:screenshot}
+\end{figure}
 
 \section{Results}
 
 \subsection{Using the IDE}
 
-\subsection{Limitations of the IDE}
-
-Usability issues
+We can use the Guided IDE to generate programs. The programs look like actual
+programs but do not actually function unless the user is very careful about
+which snippets they pick. Crucially, the variable and identifier names that our
+system generates are not in general meaningful in the scope of the generated
+program.  Whereas with the vim autocompletions the identifiers would often be
+valid because because the corpus was the current file, with the larger corpus of
+the Guided IDE and writing a program from scratch, the user is less likely to
+find program snippets that use valid identifiers.
 
 \subsection{Limitations of the model}
 
-Choosing valid identifiers, matching identifiers
+It is a limitation of the current model that identifier names are chosen
+probabilistically based on their position in the code, without regard to whether
+they are in scope and without refering to anything in another part of the
+program. Because of this limitation, the Guided IDE is not useful for practical
+purposes. We consider some alternative approaches for the Guided IDE using a
+similar model.
+
+\subsection{Alternative approaches for the IDE}
+
+\subsubsection{Prompt for identifiers}
+
+Rather than picking identifier names from the model, use placeholder identifiers
+and prompt the user to enter actual identifiers, with suggestions based on the
+current variables in scope and previously used identifiers. This would give the
+user the opportunity to create semantically valid programs, but the entering of
+identifier names could be tedious.
+
+\subsubsection{Stubs}
+
+Instead of having a movable cursor in the code window, have stubs in the
+program. Each stub would be a marker in place of an AST node. The user would
+select a stub and be given choices of snippets to replace it. Selecting a
+snippet would move the current snippet into the program in place of the selected
+stub.  The generated snippets could themselves have stubs in them, so that the
+user may continue to complete stubs and expand their program.  At the level of
+variable identifiers, the snippet suggestions would be taken from the computed
+list of in-scope variables at the position of the selected stub, unless the
+completion was for a variable declaration, in which case the user would be
+prompted to name a new variable.
+
+This approach, while offering less places to insert code then the current
+approach, would allow for programs to more closely be generated from our model,
+since the stub completions would always be at leaf nodes of the AST, whereas in
+the current approach the user may choose to insert a snippet in the middle of a
+list, which means that the transition from the inserted snippet to the following
+node in the list does not in general follow from the model.
+
+While the stub approach would be more restrictive for the user as it requires
+them to build the program in a certain way, with proper handling of identifiers,
+it may provide for an interesting or useful paradigm for interacting with a program
+source.
 
 \section{Conclusions \& Open Problems}
 
-\clearpage
+%Other applications of the model: genetic algorithms
+
+\subsection{Extending the model}
+
+Just as our approach of modeling a program with a tree-based Markov chain is a
+higher order model than a linear Markov chain of the program source code tokens,
+there may be applications of probabilistic modeling to higher-order
+representations of programs than the AST, such as a higher-order abstract syntax
+\cite{hosa}. Such an application may model the relationship between different
+parts of an AST, and handle scoping of variables to model identifiers
+abstractly.
+
+With a more sophisticated model of identifiers that could generate programs with
+identifiers in meaningful relation to eachother, Probabilistic Programming could
+be used to generate semantically valid programs, for greater assistive,
+expressive, and programmatic power.
+
 \begin{thebibliography}{1}
 
 	\bibitem{esprima} Ariya Hidayat {\em Esprima}
-		URL = \url{http://esprima.org/}
+		\\\url{http://esprima.org/}
 
 	\bibitem{markov} Takis Konstantopoulos {\em Introductory lecture notes on
-		Markov Chains and Random Walks} Uppsala University,
-		URL = \url{http://www2.math.uu.se/~takis/L/McRw/mcrw.pdf}
+		Markov Chains and Random Walks.} Uppsala University,
+		\\\url{http://www2.math.uu.se/~takis/L/McRw/mcrw.pdf}
+
+	\bibitem{hosa} Frank Pfenning, Conal Elliott
+		{\em Higher-Order Abstract Syntax.}
+		ACM SIGPLAN Notices. Vol. 23. No. 7. ACM, 1988.
+		\\\url{http://www.cs.cmu.edu/~fp/papers/pldi88.pdf}
 
 	\bibitem{escodegen} Yusuke Suzuki {\em Escodegen}
-		URL = \url{https://github.com/Constellation/escodegen}
+		\\\url{https://github.com/Constellation/escodegen}
 
 	\bibitem{parser api} Mozilla Developer Network {\em SpiderMonkey Parser API}
-		URL = \url{https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API}
+		\\\url{https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API}
 
 \end{thebibliography}
 
@@ -256,8 +389,9 @@ Choosing valid identifiers, matching identifiers
 
 \begin{figure}[h!]
 	\caption{model-sample.json}
+	\label{fig:sample-model}
 	\centering
-	A model generated from the program ``var x = 34"
+	A model generated from the program ``var x = 34;"
 \end{figure}
 
 \lstinputlisting{model-sample.json}
