@@ -7,6 +7,7 @@
 \usepackage{float}
 \usepackage{hyperref}
 \usepackage{listings}
+\usepackage[labelfont=bf]{caption}
 \usepackage[margin=3.75cm]{geometry}
 
 %\usepackage{qtree}
@@ -232,7 +233,7 @@ To generate random programs, we always begin with a ``Program'' node, and then a
 
 Naturally, identifiers and literals are a very large part of programming. Without them, code would be entirely unspecific, and would only consist of syntactic symbols and keywords. Yet they pose an issue with code generation, as we found generating identifiers or literals that are likely to be what the user is expecting an especially difficult problem to solve, let alone model. Struggling to come up with a simple, intelligent, and robust solution, and short on time, we fell back to using our existing Markov approach.
 
-In the current implementation of this system, following the paths [\emph{Identifier}, \emph{Name}], or [\emph{Literal}, \emph{Raw}] result not in node types, but rather in the text of the identifier names or literal values. This way, generating identifiers and literals is simply a probabilistic process like the rest of the code generation. Of course, this means that sometimes identifiers are added that are not in scope, that have mismatched types, or that simply make no semantic sense. (But adjusting $depth$ did seem to make programs more meaningful, as expected. This can be seen experimentally by modifying depth on our web IDE, which explained in Section 4.1.)
+In the current implementation of this system, following the paths [\emph{Identifier}, \emph{Name}], or [\emph{Literal}, \emph{Raw}] result not in node types, but rather in the text of the identifier names or literal values. This way, generating identifiers and literals is simply a probabilistic process like the rest of the code generation. Of course, this means that sometimes identifiers are added that are not in scope, that have mismatched types, or that simply make no semantic sense. (But adjusting $depth$ did seem to make programs more meaningful, as expected. This can be seen experimentally by modifying depth on our web IDE, which is discussed in Section 4.1.)
 
 %\lstinputlisting[caption=Scheduler, style=json]{../rand.js}
 
@@ -242,13 +243,11 @@ In the current implementation of this system, following the paths [\emph{Identif
 
 We integrated our model into the text editor vim to offer autocompletion
 suggestions of programs upon the user's request, using vim's
-\texttt{completefunc} feature. When the user is editing a JS file in vim with
+\texttt{completefunc} feature. When the user is editing a JavaScript file in vim with
 this feature, they may press a keyboard command to get a list of program
 snippets to choose from. The snippets are generated in the context of the
 program path at cursor's position. The user may pick one of the snippet
-suggestions to have it inserted into their code at their cursor.
-
-The autocomplete snippets are generated as follows:
+suggestions to have it inserted into their code at their cursor. The autocomplete snippets are generated as follows:
 \begin{enumerate}
 	\item Parse the contents of the current file into an AST.
 	\item Find the node path corresponding to the cursor by traversing the AST.
@@ -262,7 +261,7 @@ The autocomplete snippets are generated as follows:
 		\begin{subfigure}[h]{6.25cm}
 			\centering
 			\includegraphics[width=1.00\textwidth]{vim1}
-			\caption{Inserting a for loop} \label{fig:vim1}
+			\caption{Inserting a {\tt for} loop} \label{fig:vim1}
 		\end{subfigure}
 		\begin{subfigure}[h]{6cm}
 			\centering
@@ -297,7 +296,7 @@ that comprise our project.
 \begin{figure}[h]
   \centering
   \includegraphics[width=1.00\textwidth]{ide}
-  \caption{Screenshot of the web program editor GUI} \label{fig:screenshot}
+  \caption{Screenshot of the web program editor GUI. The header along the top indicates the path (trimmed to the selected depth) to the current position of the cursor. Code snippets on the left can be navigated using the arrow keys.} \label{fig:screenshot}
 \end{figure}
 
 \section{Results}
@@ -323,8 +322,6 @@ purposes. We consider some alternative approaches for the Guided IDE using a
 similar model.
 
 \subsection{Alternative approaches for the IDE}
-
-We explored several other approaches that could solve the issue of identifiers and literals.
 
 \subsubsection{Prompt for identifiers}
 
@@ -359,7 +356,11 @@ them to build the program in a certain way, with proper handling of identifiers,
 it may provide for an interesting or useful paradigm for interacting with a program
 source.
 
-\subsubsection{Secondary models for identifiers}
+\subsection{Intelligent handling of identifiers and literals}
+
+We explored other approaches to solve the issue of generating meaningful identifiers and literals described before.
+
+\subsubsection{Secondary models}
 
 When generating identifiers, we were interested in generating meaningful ones rather than random ones (whose weights were calculated from counts originating from identifiers that could be in entirely different places of the program.) We wanted to design a model that could keep track of when the same variables were used in the same (or similar) place.
 
@@ -367,11 +368,11 @@ One idea was to, during the parse, keep track of the path at which each variable
 
 Another idea also involved constructing a secondary model during the parse, that kept track of statements that used the same identifier. When such statements are found, it would compute the path between those statements and increment a counter associated that path. This would represent the likelihood of two nodes connected by that path using the same identifier. Then, during code generation, whenever an identifier is needed, the generator would make a list of all variables in scope at that point, and compute the path from the variable declaration (and/or last use) to the node being generated. It would look up each path in the secondary model and assign each of the in-scope variables a weight. A variable could then be chosen based on this probability.
 
-We suspect that this may affect the complexity of our algorithms significantly. If what the system is doing now is analogous to the behavior of a context-free grammar (i.e. by recursively generating nodes), having detection of bound (same) identifiers across nodes would involve pattern-matching and, perhaps even analogy-solving, could be considered more of an action of a Turing machine. This could mean the complexity of the process could be unbounded.
+We suspect that this may affect the complexity of our algorithms significantly. If what the system is doing now is analogous to the behavior of a context-free grammar (i.e. by recursively generating nodes), then detection of use of the same identifiers across nodes would involve pattern-matching and perhaps even analogy-solving. This could analogously be considered more like the action of a Turing machine, which would mean that the complexity of the process could be unbounded.
 
 Unfortunately, we were unable to implement these ideas or explore them further due to time constraints.
 
-\subsubsection{Extending the model}
+\subsubsection{Using a higher-order model}
 
 Just as our approach of modeling a program with a tree-based Markov chain is a
 higher order model than a linear Markov chain of the program source code tokens,
@@ -385,13 +386,13 @@ identifiers in meaningful relation to each other, Probabilistic Programming coul
 be used to generate semantically valid programs, for greater assistive,
 expressive, and programmatic power.
 
-\section{Conclusions}
+\section{Conclusion}
 
 We consider the web IDE a strong proof of concept for context-based code snippet generation. We are aware of some of its serious structural limitations, but we are confident that related concepts, such as genetic algorithms, might be possible. Specifically, we are interested in the possibility of creating genetic algorithms that take advantage of this platform to build and ``evolve'' code in a similar process. Perhaps it could even be given a purpose; for instance, to satisfy a set of given test cases.
 
 %Other applications of the model: genetic algorithms
 
-\subsection*{Source \& Demo}
+\subsection*{Source code \& demo}
 
 The source code for Probabilistic Programming is available online under an open
 source license:
@@ -428,19 +429,21 @@ source license:
 \section*{Appendix}
 
 \begin{figure}[h!]
-	\caption{ast-sample.json}
+	\caption{JSON AST sample}
 	\label{fig:sample-ast}
 	\centering
-	An AST generated from the program ``var x = 34;"
+    \vspace{-7pt}
+	An AST generated from the program ``{\tt var x = 34;}"
 
 	\lstinputlisting{ast-sample.json}
 \end{figure}
 
 \begin{figure}[h!]
-	\caption{model-sample.json}
+	\caption{JSON Markov model sample}
 	\label{fig:sample-model}
 	\centering
-	A model generated from the program ``var x = 34;"
+    \vspace{-7pt}
+	A Markov chain model generated from the program ``{\tt var x = 34;}"
 
 	\lstinputlisting{model-sample.json}
 \end{figure}
