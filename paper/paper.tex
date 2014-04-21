@@ -104,7 +104,8 @@ in the list. If the statement is last in its container list, we connect its \emp
 \begin{center}
 
 
-[example of AST here]
+%[example of AST here]
+See figure~\ref{fig:sample-ast} for an example of a AST
 
 % \begin{tikzpicture}[level distance=1.5cm,
 % level 1/.style={sibling distance=3.5cm},
@@ -389,12 +390,21 @@ expressive, and programmatic power.
 \section*{Appendix}
 
 \begin{figure}[h!]
+	\caption{ast-sample.json}
+	\label{fig:sample-ast}
+	\centering
+	An AST generated from the program ``var x = 34;"
+
+	\lstinputlisting{ast-sample.json}
+\end{figure}
+
+\begin{figure}[h!]
 	\caption{model-sample.json}
 	\label{fig:sample-model}
 	\centering
 	A model generated from the program ``var x = 34;"
-\end{figure}
 
-\lstinputlisting{model-sample.json}
+	\lstinputlisting{model-sample.json}
+\end{figure}
 
 \end{document}
