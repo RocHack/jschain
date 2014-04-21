@@ -173,7 +173,7 @@ that comprise our project.
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.90\textwidth]{screenshot}
+  \includegraphics[width=1.00\textwidth]{screenshot}
   \caption{Screenshot of the web program editor GUI} \label{fig:screenshot}
 \end{figure}
 
@@ -195,15 +195,52 @@ find program snippets that use valid identifiers.
 This is a limitation of the current model, that identifier names are chosen
 probabilistically based on their position in the code, without regard to whether
 they are in scope and without refering to anything in another part of the
-program.
+program. Because of this limitation, the Guided IDE is not useful for practical
+purposes. We consider some alternative approaches for the Guided IDE using a
+similar model.
 
-\subsection{Limitations of the IDE}
+\subsection{Alternative approaches for the IDE}
 
-Usability issues
+\subsubsection{Prompt for identifiers}
+
+Rather than picking identifier names from the model, use placeholder identifiers
+and prompt the user to enter actual identifiers, with suggestions based on the
+current variables in scope and previously used identifiers. This would give the
+user the opportunity to create semantically valid programs, but the entering of
+identifier names could be tedious.
+
+\subsubsection{Stubs}
+
+Instead of having a movable cursor in the code window, have stubs in the
+program. Each stub would be a marker in place of an AST node. The user would
+select a stub and be given choices of snippets to replace it. Selecting a
+snippet would move the current snippet into the program in place of the selected
+stub.  The generated snippets could themselves have stubs in them, so that the
+user may continue to complete stubs and expand their program.  At the level of
+variable identifiers, the snippet suggestions would be taken from the computed
+list of in-scope variables at the position of the selected stub, unless the
+completion was for a variable declaration, in which case the user would be
+prompted to name a new variable.
+
+This approach, while offering less places to insert code then the current
+approach, would allow for programs to more closely be generated from our model,
+since the stub completions would always be at leaf nodes of the AST, whereas in
+the current approach the user may choose to insert a snippet in the middle of a
+list, which means that the transition from the inserted snippet to the following
+node in the list does not in general follow from the model.
+
+While the stub approach would be more restrictive for the user as it requires
+them to build the program in a certain way, with proper handling of identifiers,
+it may provide for an interesting or useful paradigm for interacting with a program
+source.
+
+%\subsection{Limitations of the IDE}
 
 \subsection{Limitations of the model}
 
-Choosing valid identifiers, matching identifiers
+\subsection{Extending the model}
+
+%Choosing valid identifiers, matching identifiers
 
 \section{Conclusions \& Open Problems}
 
