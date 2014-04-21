@@ -82,10 +82,10 @@ choose the next value \cite{markov}.
 \subsubsection{AST}
 
 We work with programs at the level of abstract syntax tree (AST), using the
-syntax tree format of Mozilla's Parser API \cite{parser api}. We use
-esprima \cite{esprima}, an ECMAScript parser, to transform program source code into an AST,
-and escodegen \cite{escodegen} (ECMAScript code generator) to transform ASTs into program source
-code.
+syntax tree format of Mozilla's Parser API \cite{parser api}. We use esprima
+\cite{esprima}, an ECMAScript parser, to transform program source code into an
+AST, and escodegen \cite{escodegen} (ECMAScript code generator) to transform
+ASTs into program source code.
 
 \subsubsection{Model}
 
@@ -95,18 +95,19 @@ values. A node path is a list of node types and relationships that encodes the
 unique position of a node in a program's AST. The probability distribution for a
 node path is the set of possible node types or values that would appear in the
 syntax tree following the given path, and the respective probabilities of their
-occurrence following the given path.
+occurance following the given path.
 
 The model is implemented as a JSON object where the path is indexed into the
 object by successively indexing by each string of the path.
 
 See figure~\ref{fig:sample-model} in the appendix for a model for the program
-``var x = 34;".
+``var x = 34;" In this model we see for example that the path
+\texttt{[Program, body, VariableDeclaration, declarations]} leads to
+\texttt{VariableDeclarator} with probability 1. This indicates that a Program
+node whose body is a VariableDeclaration always has a declaration that is of
+type VariableDeclarator.
 
-%\lstinputlisting[caption=Scheduler, style=json]{../rand.js}
-
-Other applications of the model: genetic algorithms
-
+\clearpage
 \subsection{Application}
 
 \subsubsection{vim autocomplete script}
@@ -129,32 +130,44 @@ The autocomplete snippets are generated as follows:
 	\item Present the programs to the user as code completion snippets.
 \end{enumerate}
 
-The vim autocomplete feature is limited to generating full programs on a single
-line, and requires explicitly triggering the \texttt{completefunc} feature for
-code snippets.
-
 \begin{figure}[h]
 	\centering
 	\begin{tabular}{c c}
-
 		\begin{subfigure}[h]{6.25cm}
 			\centering
 			\includegraphics[width=1.00\textwidth]{vim1}
 			\caption{Inserting a for loop} \label{fig:vim1}
 		\end{subfigure}
-
 		\begin{subfigure}[h]{6cm}
 			\centering
 			\includegraphics[width=1.00\textwidth]{vim2}
 			\caption{Inserting an object property} \label{fig:vim2}
 		\end{subfigure}
 	\end{tabular}
-
-	\caption{Screenshots of vim using autocomplete}
+	\caption{Screenshots of vim using autocomplete of programs}
 \end{figure}
 
+The vim autocomplete feature is limited to inserting program snippets on a single
+line, and requires the user to explicitly trigger the \texttt{completefunc}
+feature to be prompted with code snippets. To further explore using our model
+for editing, we created a web-based editor that more deeply integrates Probabilistic
+Programming.
 
+\clearpage
 \subsubsection{Guided IDE}
+
+The Guided IDE offers users an environment for building a program entirely using
+our model, using program snippets generated at the cursor's context as building
+blocks. The editor presents a window for the program text, and and list of
+suggestion code snippets. The user can move a cursor through the code window at
+positions corresponding to boundaries of program nodes. As the user moves the
+cursor, the snippet suggestions are regenerated using the cursor's node path, to
+continuosly provide suggestions relevant to the current context of the program. When the
+user selects a suggestion snippet, its AST is inserted into the program's AST at
+the cursor's position in the tree, and the code window is redrawn. The user can
+move the cursor within newly inserted blocks, so that the program can grow
+deeper. The initial corpus for the IDE's model consists of the JavaScript files
+that comprise our project.
 
 \begin{figure}[h]
   \centering
@@ -162,11 +175,13 @@ code snippets.
   \caption{Screenshot of the web program editor GUI} \label{fig:screenshot}
 \end{figure}
 
-Design decisions, HCI factors
+%Design decisions, HCI factors
 
 \section{Results}
 
 \subsection{Using the IDE}
+
+We can use the Guided IDE to generate programs.
 
 \subsection{Limitations of the IDE}
 
@@ -177,6 +192,8 @@ Usability issues
 Choosing valid identifiers, matching identifiers
 
 \section{Conclusions \& Open Problems}
+
+Other applications of the model: genetic algorithms
 
 \clearpage
 \begin{thebibliography}{1}
