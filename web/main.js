@@ -12,9 +12,16 @@ var escodegenOptions = {
 	}
 };
 var END = "_end";
-var depth = 4;
 
-var model = window.corpusModel;
+var depth;
+var model;
+
+window.setDepth = function (d) {
+	depth = d;
+	model = window.corpusModel[d];
+}
+
+setDepth(4);
 
 var tree;
 
@@ -93,23 +100,14 @@ function setCurrentPath(path) {
 
 window.setCurrentPathToNode = function (node) {
 
-	console.log("setting current path to node ",node);
-
 	if (node.type == "ExpressionStatement")
 		node = node.expression;
 
 	// console.log("looking for", node, " in ",tree);
 	currentPosition = getPath(tree, node);
-	if (!currentPosition) {
-		console.log("tree:", JSON.stringify(tree), 'Node:', JSON.stringify(node));
-	}
-
-	console.log("current position is ",currentPosition);
 }
 
 window.insertSnippet = function (node) {
-
-	console.log("inserting snippet", node);
 
 	if (!tree)
 	{
@@ -142,7 +140,7 @@ function labelNodeId(node) {
 window.getNodeById = function (id) {
 	var node = nodesById[id];
 	if (!node) {
-		console.log("no node found with id", id);
+		//console.log("no node found with id", id);
 	}
 	return node;
 };
@@ -164,7 +162,7 @@ function generateProgramSource() {
 }
 
 window.getSnippets = function (num) {
-	console.log("**** generating snippet from path ",currentPosition.path);
+	console.log("path =",currentPosition.path);
 	return array(num).map(generateProgramSource).filter(Boolean);
 };
 
@@ -172,17 +170,14 @@ window.getCurrentPosition = function () {
 	return currentPosition;
 };
 
-window.deleteSnippet = function (node) {
-
-	console.log("deleting snippet", node);
-
+window.deleteCurrentSnippet = function () {
 	if (isNaN(currentPosition.idx)) 
 	{
 		currentPosition.container[currentPosition.idx] = null;
 	} 
 	else
 	{
-		currentPosition.container.splice(currentPosition.idx, currentPosition.idx);
+		currentPosition.container.splice(currentPosition.idx, 1);
 	}
 
 	//console.log("generating tree", tree);

@@ -49,7 +49,7 @@ function checkKey(e)
 	        // up arrow
 			currentSelection -= 1;
 	    }
-	    else if (e.keyCode == 40 && currentSelection < numSelections)
+	    else if (e.keyCode == 40 && currentSelection < numSelections - 1)
 	    {
 	        // down arrow
 	    	currentSelection += 1;
@@ -100,9 +100,9 @@ function moveCursor(forward) {
 	var node, elem, found;
 	function findStatement(i, el) {
 		var n = window.getNodeById($(el).data('node-id'));
-		console.log("NODE!", n, el.innerText);
+		// console.log("NODE!", n, el.innerText);
 		if (n) {
-			console.log("go to children");
+			// console.log("go to children");
 			$(el).children('.statement').eachDir(findStatement, forward);
 			if (found) return false;
 		}
@@ -120,13 +120,13 @@ function moveCursor(forward) {
 	while (!found && from.length) {
 		if (i++ > 50) throw new Error("too much recursion");
 		from[dirAll]('.statement').each(findStatement);
-		console.log("go to parent", from);
+		// console.log("go to parent", from);
 		from = from.parent();
 	}
 	if (!from) {
 		// set it to the beginning
 	}
-	console.log("Found:", found, "elem", elem && elem.innerText);
+	// console.log("Found:", found, "elem", elem && elem.innerText);
 	if (!node) return;
 	window.setCurrentPathToNode(node);
 	cursor.insertAfter(elem);
@@ -187,13 +187,22 @@ function restoreCursor(node)
 
 function deleteKey()
 {
-	var newCode = window.deleteSnippet(cursor.prev());
+	var cursorPos = cursor.prev().prev();
+	var nodeid = $(cursorPos).data('node-id');
+
+	console.log('cursorPos = ',cursorPos[0], 'id = ',nodeid);
+
+	console.log('getting node by id '+nodeid);
+	var node = window.getNodeById(nodeid);
+
+	console.log('node = ',node);
+
+	var newCode = window.deleteCurrentSnippet();
 
 	$('#editor').html(newCode);
 
-	window.setCurrentPathToNode(cursor.prev());
-
-	restoreCursor(cursor.prev());
+	window.setCurrentPathToNode(node);
+	restoreCursor(nodeid);
 
 	newOptions();
 }
