@@ -179,6 +179,8 @@ function complete(option)
 
 	$('#editor').html(newCode);
 
+$('#editor').each(function(i, e) {hljs.highlightBlock(e)});
+
 	if (node.type != 'Program')
 		window.setCurrentPathToNode(node);
 
@@ -212,6 +214,7 @@ function deleteKey()
 
 	$('#editor').html(newCode);
 
+
 	window.setCurrentPathToNode(node);
 	restoreCursor(nodeid);
 
@@ -227,6 +230,7 @@ function newOptions()
 	{
 		code = snips[i];
 		var pre = $('<pre></pre>').html(code);
+		pre.each(function(i, e) {hljs.highlightBlock(e)});
 		$('#options').append($('<li></li>').append(pre));
 	}
 
